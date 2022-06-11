@@ -1,12 +1,12 @@
-"use strict"
+'use strict';
 
 const FavouriteSchema = (sequelize, DataTypes) => {
-    const Schema = sequelize.define('favourite', {
-        abayaId: { type: DataTypes.INTEGER },
+  const Schema = sequelize.define('favourites', {
+    abayaId: { type: DataTypes.ARRAY(DataTypes.STRING), defaultValue: [] },
 
-        userId: { type: DataTypes.INTEGER }
-    })
-    return Schema
-}
+    userId: { type: DataTypes.STRING, require: true },
+  });
+  return Schema;
+};
 
-module.exports = FavouriteSchema
+module.exports = FavouriteSchema;
