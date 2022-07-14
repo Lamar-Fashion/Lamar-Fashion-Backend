@@ -13,11 +13,13 @@ const POSTGRES_URI = process.env.DATABASE_URI || 'postgres://localhost:5432/lama
 
 const sequelize = new Sequelize(POSTGRES_URI, sequelizeOptions);
 
+// models
 const abayaModel = abayas(sequelize, DataTypes);
 const bookedAbayaModel = bookedAbaya(sequelize, DataTypes);
 const favouriteModel = favourite(sequelize, DataTypes);
 const userModel = users(sequelize, DataTypes);
-console.log('userModel', userModel);
+
+// collections
 const userCollection = new Collection(userModel);
 const favouritCollection = new Collection(favouriteModel);
 const bookedAbayaCollection = new Collection(bookedAbayaModel);

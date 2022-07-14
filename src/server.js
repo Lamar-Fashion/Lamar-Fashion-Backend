@@ -13,12 +13,12 @@ const errorHandler = require('./error-handlers/500');
 
 // import the routers
 const authRoutes = require('./routers/auht.route');
-// const apiRoutes = require('./routers/api.route');
+const apiRoutes = require('./routers/api.route');
 const adminRoutes = require('./routers/admin.route');
 
 // use routes
 app.use('/', authRoutes);
-// app.use('/', apiRoutes);
+app.use('/', apiRoutes);
 app.use('/', adminRoutes);
 
 // proof of life

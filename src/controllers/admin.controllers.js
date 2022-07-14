@@ -2,39 +2,6 @@
 
 // import models
 const { favouritCollection, bookedAbayaCollection, abayaCollection, userCollection } = require('../models/index');
-let abaya = {
-  productIamges: [
-    'https://firebasestorage.googleapis.com/v0/b/lamar-fashion.appspot.com/o/products%2F23-5-2022%406%3A51%20-%20UTv4UbCw.jpeg?alt=media&token=e3892239-e32b-4fb1-b59c-00df57cd6e79',
-    'https://firebasestorage.googleapis.com/v0/b/lamar-fashion.appspot.com/o/products%2F23-5-2022%406%3A51%20-%20ready-to-wear.jpeg?alt=media&token=58f8abfb-98ec-4e19-9f4d-31db0ba62c32',
-  ],
-  category: 'newArrivals',
-  status: 'notReadyToWear',
-  code: 'alg564',
-  description: 'product desc sample',
-  price: '1200',
-  colors: [
-    {
-      value: 'XS',
-      label: 'XS',
-    },
-    {
-      value: 'S',
-      label: 'S',
-    },
-  ],
-  sizes: [
-    {
-      value: 'blue',
-      label: 'Blue',
-    },
-    {
-      value: 'purple',
-      label: 'Purple',
-    },
-  ],
-  totalInStock: '10',
-  addToHomePage: 'yes',
-};
 
 // add new product handler
 async function addProductHandler(req, res, next) {
@@ -63,14 +30,109 @@ async function addProductHandler(req, res, next) {
     next(e.message, 'add product error');
   }
 }
+//edit product handler
+async function editProductHandler(req, res, next) {
+  try {
+    const {id} =req.params;
+    // edit product 
+    const response = await abayaCollection.update(id,req.body);
+    // return the object to the client
+    res.status(201).send(response);
+  } catch (e) {
+    next(e.message, 'edit product error');
+  }
+}
+//delete product handler
+async function deleteProductHandler(req, res, next) {
+  try {
+    const {id} =req.params;
+    console.log('idddddddddddddddddddd',id);
+    // delete product 
+    const response = await abayaCollection.delete(id);
+    console.log('deleteeeeeeeeeeeeeeeeedddddd',response);
+    // return deleted object to the client
+    res.status(202).json({deletedAt:response});
+  } catch (e) {
+    next(e.message, 'delete product error');
+  }
+}
+//get pending orders handler
+async function getPendingOrdersHandler(req, res, next) {
+  try {
+    // get pending orders
+    const response = await bookedAbayaCollection.model.findAll({
+      where: {
+        orderStatus: 'pending'
+      }
+    });;
 
+    res.status(200).send(response);
+  } catch (e) {
+    next(e.message, 'get pending orders error');
+  }
+}
+
+//get done orders handler
+async function getDoneOrdersHandler(req, res, next) {
+  try {
+    // get done orders
+    const response = await bookedAbayaCollection.model.findAll({
+      where: {
+        orderStatus: 'done'
+      }
+    });;
+
+    res.status(200).send(response);
+  } catch (e) {
+    next(e.message, 'get done orders error');
+  }
+}
+//get rejected orders handler
+async function getRejectedOrdersHandler(req, res, next) {
+  try {
+    // get rejected orders
+    const response = await bookedAbayaCollection.model.findAll({
+      where: {
+        orderStatus: 'rejected'
+      }
+    });;
+
+    res.status(200).send(response);
+  } catch (e) {
+    next(e.message, 'get rejected orders error');
+  }
+}
+//get all users handler
+async function getAllUsersHandler(req, res, next) {
+  try {
+    // get all users
+    const response = await userCollection.read();
+
+    res.status(200).send(response);
+  } catch (e) {
+    next(e.message, 'get all users error');
+  }
+}
+
+//edit order handler
+async function editOrderHandler(req, res, next) {
+  try {
+    const {id} =req.params;
+    // edit product 
+    const response = await bookedAbayaCollection.update(id,req.body);
+    // return the object to the client
+    res.status(201).send(response);
+  } catch (e) {
+    next(e.message, 'edit order error');
+  }
+}
 module.exports = {
   addProductHandler,
-  //   editProductHandler,
-  //   deleteProductHandler,
-  //   editOrderHandler,
-  //   getPendingOrdersHandler,
-  //   getDoneOrdersHandler,
-  //   getRejectedOrdersHandler,
-  //   getAllUsersHandler,
+    editProductHandler,
+    deleteProductHandler,
+    editOrderHandler,
+    getPendingOrdersHandler,
+    getDoneOrdersHandler,
+    getRejectedOrdersHandler,
+    getAllUsersHandler,
 };

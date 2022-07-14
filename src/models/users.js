@@ -18,7 +18,7 @@ const userSchema = (sequelize, DataTypes) => {
     token: {
       type: DataTypes.VIRTUAL,
       get() {
-        return jwt.sign({ email: this.email, role: this.role, firstName: this.firstName, lastName: this.lastName }, SECRET);
+        return jwt.sign({ email: this.email, role: this.role, firstName: this.firstName, lastName: this.lastName , password:this.password,id:this.id}, SECRET);
       },
       set(tokenObj) {
         return jwt.sign(tokenObj, SECRET);
@@ -58,6 +58,7 @@ const userSchema = (sequelize, DataTypes) => {
 
   // authenticate basic check the user is exists or not, then check the password
   Schema.authenticateBasic = async function (email, password) {
+    console.log('email, password',email,password);
     try {
       const user = await this.findOne({ where: { email } });
       const valid = await bcrypt.compare(password, user.password);

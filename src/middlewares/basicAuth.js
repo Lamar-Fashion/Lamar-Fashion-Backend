@@ -14,19 +14,19 @@ module.exports = async (req, res, next) => {
 
   let basic = req.headers.authorization.split(' ').pop();
 
-  // get original username & passowrd
+  // get original email & passowrd
   let [user, pass] = base64.decode(basic).split(':');
 
   try {
-    // check the username & password with original ones in DB
+    // check the email & password with original ones in DB
     req.user = await userCollection.model.authenticateBasic(user, pass);
     next();
   } catch (e) {
     errorByAuthentication();
   }
 
-  // error handler for invalid username or password
+  // error handler for invalid email or password
   function errorByAuthentication() {
-    next('Invalid username or password');
+    next('Invalid email or password');
   }
 };

@@ -5,10 +5,10 @@ const BookedAbayaSchema = (sequelize, DataTypes) => {
   const Schema = sequelize.define('bookedAbayas', {
     productInfo: { type: DataTypes.ARRAY(DataTypes.JSON), require: true, defaultValue: [] },
     personalInfo: { type: DataTypes.JSON, defaultValue: {}, require: true },
-    comment: { type: DataTypes.STRING },
+    // comment: { type: DataTypes.STRING },
     totalPrice: { type: DataTypes.STRING, require: true },
     paymentMethod: { type: DataTypes.STRING, require: true, defaultValue: 'cash on delivery' },
-    IsPaidSuccessfully: { type: DataTypes.BOOLEAN, require: true, defaultValue: false },
+    // IsPaidSuccessfully: { type: DataTypes.BOOLEAN, require: true, defaultValue: false },
     orderStatus: { type: DataTypes.STRING, require: true, defaultValue: 'pending' },
     orderId: { type: DataTypes.STRING, require: true },
   });
