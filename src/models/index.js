@@ -9,7 +9,7 @@ const Collection = require('./dataCollection');
 console.log('users', users);
 
 let sequelizeOptions = {};
-const POSTGRES_URI = process.env.DATABASE_URI || 'postgres://localhost:5432/lamar';
+const POSTGRES_URI = process.env.DATABASE_URL || 'postgres://localhost:5432/lamar';
 
 const sequelize = new Sequelize(POSTGRES_URI, sequelizeOptions);
 
