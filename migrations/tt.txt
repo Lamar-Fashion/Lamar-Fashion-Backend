@@ -1,0 +1,9 @@
+npx sequelize-cli model:generate --name users --attributes email:string,firstName:string,lastName:string,password:string,role:string,token:virtual,capabilities:virtual
+
+
+npx sequelize-cli model:generate --name favourites --attributes abayaId:array,userId:string
+
+npx sequelize-cli model:generate --name bookedAbayas --attributes productInfo:array,personalInfo:json,totalPrice:string,paymentMethod:string,orderStatus:string,orderId:string
+
+
+npx sequelize-cli model:generate --name abayas --attributes colors:array,sizes:array,images:array,category:string,code:string,price:string,status:string,description:string,inStock:string,addToHomePage:boolean

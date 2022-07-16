@@ -5,10 +5,8 @@ const BookedAbayaSchema = (sequelize, DataTypes) => {
   const Schema = sequelize.define('bookedAbayas', {
     productInfo: { type: DataTypes.ARRAY(DataTypes.JSON), require: true, defaultValue: [] },
     personalInfo: { type: DataTypes.JSON, defaultValue: {}, require: true },
-    // comment: { type: DataTypes.STRING },
     totalPrice: { type: DataTypes.STRING, require: true },
     paymentMethod: { type: DataTypes.STRING, require: true, defaultValue: 'cash on delivery' },
-    // IsPaidSuccessfully: { type: DataTypes.BOOLEAN, require: true, defaultValue: false },
     orderStatus: { type: DataTypes.STRING, require: true, defaultValue: 'pending' },
     orderId: { type: DataTypes.STRING, require: true },
   });
@@ -16,39 +14,3 @@ const BookedAbayaSchema = (sequelize, DataTypes) => {
 };
 
 module.exports = BookedAbayaSchema;
-/* 
-
-    cart object we will save  just this object  
-
-    {
-        color : ... ,
-        size : ... ,
-        code: ... ,
-        quantity : ... ,
-        buttons: ... ,
-        tall : ... ,
-        status : ... ,
-        delivery Time: ... ,
-        in Stock Qnt : ... ,
-        availability:...,
-        category : .. ,
-        image : ... ,
-        price:...
-
-
-    }
-
-    info object we will save  just this object  
-
-    {
-        firstName : ... ,
-        lastName : ... ,
-        Email: ... ,
-        phone : ... ,
-        country: ... ,
-        city : ... , 
-        zone : ... ,
-        faltNumber : ... 
-    }
-
-    */
