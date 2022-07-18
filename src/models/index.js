@@ -14,22 +14,12 @@ let sequelizeOptions = {  dialectOptions: {
     rejectUnauthorized: false // This line will fix new error
   }
 },};
-const POSTGRES_URI = process.env.DATABASE_URL || 'postgres://localhost:5432/lamar';
 
-// const sequelize = new Sequelize({
-//   database: "dfh2p2kvjg08tf",
-//   username: "kglhgcjpspjlvl",
-//   password: "a06d032fdc5457c89f20ccff0209704f76cfc77014889bff6663fcc1db059f38",
-//   host: "ec2-34-242-84-130.eu-west-1.compute.amazonaws.com",
-//   port: 5432,
-//   dialect: "postgres",
-//   dialectOptions: {
-//     ssl: {
-//       require: true, // This will help you. But you will see nwe error
-//       rejectUnauthorized: false // This line will fix new error
-//     }
-//   },
-// });
+process.env.NODE_ENV == 'development' ? sequelizeOptions= {} : sequelizeOptions;
+// sequelizeOptions= {};
+const POSTGRES_URI = process.env.DATABASE_URL || 'postgres://localhost:5432/lamar';
+console.log('process.env.NODE_ENV',process.env.NODE_ENV);
+console.log('sequelizeOptions',sequelizeOptions);
 const sequelize = new Sequelize(POSTGRES_URI, sequelizeOptions);
 
 // models
