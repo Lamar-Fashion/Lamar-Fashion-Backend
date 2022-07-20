@@ -1,7 +1,7 @@
 npx sequelize-cli model:generate --name users --attributes email:string,firstName:string,lastName:string,password:string,role:string,token:virtual,capabilities:virtual
 
 
-npx sequelize-cli model:generate --name favourites --attributes abayaId:array,userId:string
+npx sequelize-cli model:generate --name favourites --attributes abayaIds:array,userId:string
 
 npx sequelize-cli model:generate --name bookedAbayas --attributes productInfo:array,personalInfo:json,totalPrice:string,paymentMethod:string,orderStatus:string,orderId:string
 
