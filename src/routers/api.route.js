@@ -68,12 +68,15 @@ if (userFavRecord && userFavRecord.length > 0 && userFavRecord.abayaId && userFa
       return favItem;
   })
        allFavItems  = await Promise.all(favPromises);
+    res.status(200).send(allFavItems);
+
   
 }else{
   allFavItems = [];
+  res.status(200).send(allFavItems);
+
 }
 
-    res.status(200).send(allFavItems);
   } catch (error) {
     next(error.message, 'get favourites error');
   }
