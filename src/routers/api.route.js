@@ -60,13 +60,18 @@ async function getFavouriteHandler(req, res, next) {
   const {userId} = req.params;
   try {
     const userFavRecord = await favouritCollection.read(userId);
-
-const favPromises = userFavRecord[0]?.abayaId?.map(async(favId)=>{
-  const favItem = await abayaCollection.model.findOne({
-    where:{id : favId } });
-    return favItem;
-})
-    const allFavItems  = await Promise.all(favPromises);
+    let allFavItems;
+if (userFavRecord) {
+  const favPromises = userFavRecord[0]?.abayaId?.map(async(favId)=>{
+    const favItem = await abayaCollection.model.findOne({
+      where:{id : favId } });
+      return favItem;
+  })
+       allFavItems  = await Promise.all(favPromises);
+  
+}else{
+  allFavItems = [];
+}
 
     res.status(200).send(allFavItems);
   } catch (error) {
@@ -87,11 +92,11 @@ if (favId == id) {
 });
 console.log('userFavRecord',userFavRecord);
 const newAbayaIds = userFavRecord.abayaId;
-userFavRecord.abayaId= [];
+userFavRecord.abayaId=null;
 userFavRecord.abayaId= newAbayaIds;
  await userFavRecord.save({ fields: ['abayaId'] });
  let response = await userFavRecord.reload();
- response ?  res.status(200).send(true) : res.status(200).send(null) ;
+    res.status(200).send(response);
   } catch (error) {
     next(error.message, 'remove favourite error');
   }
