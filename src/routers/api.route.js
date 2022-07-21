@@ -61,7 +61,10 @@ async function getFavouriteHandler(req, res, next) {
   try {
     const userFavRecord = await favouritCollection.read(userId);
     let allFavItems;
-if (userFavRecord && userFavRecord.length > 0 && userFavRecord.abayaId && userFavRecord.abayaId.length > 0) {
+
+
+if (userFavRecord && userFavRecord.length > 0 && userFavRecord[0].abayaId && userFavRecord[0].abayaId.length > 0) {
+
   const favPromises = userFavRecord[0]?.abayaId?.map(async(favId)=>{
     const favItem = await abayaCollection.model.findOne({
       where:{id : favId } });
@@ -72,6 +75,7 @@ if (userFavRecord && userFavRecord.length > 0 && userFavRecord.abayaId && userFa
 
   
 }else{
+
   allFavItems = [];
   res.status(200).send(allFavItems);
 
