@@ -25,7 +25,6 @@ apiRouter.get('/homePageProducts', homePageProductsHandler);
 
 // add To Favourite Handler
 async function addToFavouriteHandler(req, res, next) {
-  console.log('req.body', req.body);
   const {userId , abayaId} = req.body;
 
 
@@ -46,13 +45,13 @@ if (favFromDB) {
   }
 
   // save first favourite record for this user
-  response = await favouritCollection.create(favObj);
+  response = await favouritCollection.create(favObj,next);
 }
      
     // return the object  to the client
     res.status(200).send(response);
   } catch (e) {
-    next(e.message, 'add to favourite error');
+    next('add to favourite error');
   }
 }
 // get favourites handler
@@ -82,7 +81,7 @@ if (userFavRecord && userFavRecord.length > 0 && userFavRecord[0].abayaId && use
 }
 
   } catch (error) {
-    next(error.message, 'get favourites error');
+    next('get favourites error');
   }
 }
 // remove favourites handler
@@ -105,7 +104,7 @@ userFavRecord.abayaId= newAbayaIds;
  let response = await userFavRecord.reload();
     res.status(200).send(response);
   } catch (error) {
-    next(error.message, 'remove favourite error');
+    next('remove favourite error');
   }
 }
 
@@ -114,7 +113,6 @@ async function addToCartHandler(req, res, next) {
   try {
 
   const { productInfo, personalInfo,totalPrice  } = req.body;
-  console.log('req.body',req.body);
   let currentdate = new Date(); 
 let datetime = currentdate.getDate() + "/"
                 + (currentdate.getMonth()+1)  + "/" 
@@ -138,13 +136,12 @@ for (let i = 0; i < productInfo.length; i++) {
 if (total !== totalPrice) return next('invalid total price!');
 
     // save the order
-    const response = await bookedAbayaCollection.create(order);
-    console.log('response', response);
+    const response = await bookedAbayaCollection.create(order,next);
 
     // return the object  to the client
     res.status(201).send(response);
   } catch (e) {
-    next(e.message, 'save order error');
+    next('submit order - server error');
   }
 }
 
@@ -155,7 +152,7 @@ async function allProductsHandler(req, res, next) {
 
     res.status(200).send(products);
   } catch (error) {
-    next(e.message, 'get all products error');
+    next('get all products error');
   }
 }
 // get home page Products handler
@@ -169,7 +166,7 @@ async function homePageProductsHandler(req, res, next) {
 
     res.status(200).send(products);
   } catch (error) {
-    next(e.message, 'get home products error');
+    next('get home products error');
   }
 }
 

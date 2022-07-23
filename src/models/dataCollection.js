@@ -5,11 +5,16 @@ class Collection {
     this.model = model;
   }
 
-  async create(obj) {
+  async create(obj ,next) {
     try {
       return await this.model.create(obj);
     } catch (error) {
       console.log(error);
+      console.log(error.message);
+      if (error.message == 'Validation error' && error?.errors[0]?.message == 'email must be unique') {
+   next('email already exists!');
+        
+      }
       console.error('can not create a new record on ', this.model.name);
     }
   }

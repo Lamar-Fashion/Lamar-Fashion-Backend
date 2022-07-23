@@ -19,10 +19,9 @@ authRouter.put('/user:id', bearerAuth, updateUserHandler);
 
 // signup hndler
 async function signUpHandler(req, res, next) {
-  console.log('req.body', req.body);
   try {
     // save user object
-    const userRecord = await userCollection.create(req.body);
+    const userRecord = await userCollection.create(req.body,next);
     console.log('userRecord', userRecord);
     // get the user object and its token
     const output = {
@@ -39,15 +38,15 @@ async function signUpHandler(req, res, next) {
 
 // sign-in handler
 function signInHandler(req, res, next) {
-  console.log('req.userrrrrrrrrrrrrrrrrrrrrr',req.user);
   const user = {
     user: req.user,
     token: req.user.token,
   };
+
   try {
     res.status(200).send(user);
   } catch (error) {
-    next(e.message, 'sign-in error');
+    next('sign-in server error');
   }
 }
 
