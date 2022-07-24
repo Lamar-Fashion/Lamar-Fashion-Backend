@@ -33,6 +33,7 @@ async function addToFavouriteHandler(req, res, next) {
     let favObj ,response;
 if (favFromDB) {
 
+  if(favFromDB.abayaId.includes(abayaId.toString())) return res.status(200).send({msg:'already in your wishlist'});
   // prevent duplicates items
   !favFromDB.abayaId.includes(abayaId.toString()) ? favFromDB.abayaId = [...favFromDB.abayaId,abayaId.toString()] : null;
 
@@ -61,7 +62,6 @@ async function getFavouriteHandler(req, res, next) {
     const userFavRecord = await favouritCollection.read(userId);
     let allFavItems;
 
-
 if (userFavRecord && userFavRecord.length > 0 && userFavRecord[0].abayaId && userFavRecord[0].abayaId.length > 0) {
 
   const favPromises = userFavRecord[0]?.abayaId?.map(async(favId)=>{
@@ -70,7 +70,19 @@ if (userFavRecord && userFavRecord.length > 0 && userFavRecord[0].abayaId && use
       return favItem;
   })
        allFavItems  = await Promise.all(favPromises);
-    res.status(200).send(allFavItems);
+let freeDeletedIds = [];
+       // remove null values that comes from getting deleting products
+     const freeNullArray =   allFavItems.filter((item)=> {
+      
+      if(item) {
+        freeDeletedIds.push(item.id.toString());
+        return item;
+      }
+    
+    })
+    userFavRecord[0].abayaId = freeDeletedIds;
+    await userFavRecord[0].save();
+    res.status(200).send(freeNullArray);
 
   
 }else{
@@ -96,7 +108,6 @@ if (favId == id) {
   return;
 }
 });
-console.log('userFavRecord',userFavRecord);
 const newAbayaIds = userFavRecord.abayaId;
 userFavRecord.abayaId=null;
 userFavRecord.abayaId= newAbayaIds;

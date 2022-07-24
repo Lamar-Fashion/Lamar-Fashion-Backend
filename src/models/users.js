@@ -38,6 +38,8 @@ const userSchema = (sequelize, DataTypes) => {
 
   // before save method
   Schema.beforeCreate(async (user) => {
+    console.log('from createeeeeeee');
+    if(!user?.password) return;
     try {
       const hashedPassword = await bcrypt.hash(user.password, 10);
       user.password = hashedPassword;
@@ -48,6 +50,10 @@ const userSchema = (sequelize, DataTypes) => {
 
   // before update method
   Schema.beforeUpdate(async (user) => {
+
+    // this condition to check if the password did not changed so don't go and hash the hashed pass again, cuz its value will be changed and won't represents the original plain text pass anymore.
+    if(user?.passDidnotChanged) return;
+
     try {
       const hashedPassword = await bcrypt.hash(user.password, 10);
       user.password = hashedPassword;

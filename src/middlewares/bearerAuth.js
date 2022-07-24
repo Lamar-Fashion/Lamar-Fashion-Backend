@@ -23,6 +23,6 @@ module.exports = async (req, res, next) => {
 
   // error handler for invalid token
   function errorByAuthentication(e) {
-    next('Invalid Token', e);
+    next('Invalid Token');
   }
 };

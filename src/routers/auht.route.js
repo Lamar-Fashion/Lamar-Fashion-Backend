@@ -1,6 +1,7 @@
 'use strict';
 
 const express = require('express');
+const bcrypt = require('bcrypt');
 
 // use express Router
 const authRouter = express.Router();
@@ -32,7 +33,8 @@ async function signUpHandler(req, res, next) {
     // return the object and token to the client
     res.status(201).send(output);
   } catch (e) {
-    next(e.message, 'sign-up error');
+    
+    next('sign-up error');
   }
 }
 
@@ -53,12 +55,27 @@ function signInHandler(req, res, next) {
 // update user handler
 async function updateUserHandler(req, res, next) {
   const {id} =req.params;
-  console.log('idddddddddd',id);
-  console.log('req.body updattttte',req.body);
+  const {firstName,lastName,email,password,oldPassword} =req.body;
   try {
+ 
+  let updatedObj = req.user;
+  updatedObj.firstName = firstName;
+  updatedObj.lastName = lastName;
+  updatedObj.email = email;
+// check if the user is editing his password or not. password >> represents the new pass, oldPassword >> the old pass.
+  if (password && oldPassword) {
+
+    // validate the old password first, then confirm new pass
+    const valid = await bcrypt.compare(oldPassword, req.user.password);
+    valid ? updatedObj.password = password : next('Invalid Old Password!');
+  }else{
+    updatedObj.passDidnotChanged = true;
+  }
+ 
+
     // update user object
-    const userRecord = await userCollection.update(id,req.body);
-    console.log('updated user', userRecord);
+    const userRecord = await updatedObj.save();
+
     // get the user object and its token
     const output = {
       user: userRecord,
@@ -67,8 +84,12 @@ async function updateUserHandler(req, res, next) {
 
     // return the object and token to the client
     res.status(201).send(output);
-  } catch (e) {
-    next(e.message, 'update user error');
+  } catch (error) {
+    if (error.message == 'Validation error' && error?.errors[0]?.message == 'email must be unique') {
+      next('email already exists!');
+           
+         }
+    next('update user error');
   }
 }
 

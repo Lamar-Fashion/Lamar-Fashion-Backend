@@ -27,7 +27,7 @@ async function addProductHandler(req, res, next) {
     // return the object to the client
     res.status(201).send(response);
   } catch (e) {
-    next(e.message, 'add product error');
+    next('add product error');
   }
 }
 //edit product handler
@@ -39,21 +39,19 @@ async function editProductHandler(req, res, next) {
     // return the object to the client
     res.status(201).send(response);
   } catch (e) {
-    next(e.message, 'edit product error');
+    next('edit product error');
   }
 }
 //delete product handler
 async function deleteProductHandler(req, res, next) {
   try {
     const {id} =req.params;
-    console.log('idddddddddddddddddddd',id);
     // delete product 
     const response = await abayaCollection.delete(id);
-    console.log('deleteeeeeeeeeeeeeeeeedddddd',response);
     // return deleted object to the client
     res.status(202).json({deletedAt:response});
   } catch (e) {
-    next(e.message, 'delete product error');
+    next('delete product error');
   }
 }
 //get pending orders handler
@@ -68,7 +66,7 @@ async function getPendingOrdersHandler(req, res, next) {
 
     res.status(200).send(response);
   } catch (e) {
-    next(e.message, 'get pending orders error');
+    next('get pending orders error');
   }
 }
 
@@ -84,7 +82,7 @@ async function getDoneOrdersHandler(req, res, next) {
 
     res.status(200).send(response);
   } catch (e) {
-    next(e.message, 'get done orders error');
+    next('get done orders error');
   }
 }
 //get rejected orders handler
@@ -99,7 +97,7 @@ async function getRejectedOrdersHandler(req, res, next) {
 
     res.status(200).send(response);
   } catch (e) {
-    next(e.message, 'get rejected orders error');
+    next('get rejected orders error');
   }
 }
 //get all users handler
@@ -110,7 +108,7 @@ async function getAllUsersHandler(req, res, next) {
 
     res.status(200).send(response);
   } catch (e) {
-    next(e.message, 'get all users error');
+    next('get all users error');
   }
 }
 
@@ -123,7 +121,7 @@ async function editOrderHandler(req, res, next) {
     // return the object to the client
     res.status(201).send(response);
   } catch (e) {
-    next(e.message, 'edit order error');
+    next('edit order error');
   }
 }
 module.exports = {
