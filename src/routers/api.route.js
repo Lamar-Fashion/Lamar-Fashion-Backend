@@ -2,6 +2,7 @@
 
 const express = require('express');
 const { v4: uuidv4 } = require('uuid');
+const {db} = require('../models/index');
 
 // use express Router
 const apiRouter = express.Router();
@@ -22,6 +23,7 @@ apiRouter.delete('/favourite/:userId/:id', bearerAuth, removeFavouriteHandler);
 apiRouter.post('/addToCart', addToCartHandler);
 apiRouter.get('/allProducts', allProductsHandler);
 apiRouter.get('/homePageProducts', homePageProductsHandler);
+apiRouter.get('/search/:lookupValue', searcchProductsHandler);
 
 // add To Favourite Handler
 async function addToFavouriteHandler(req, res, next) {
@@ -178,6 +180,23 @@ async function homePageProductsHandler(req, res, next) {
     res.status(200).send(products);
   } catch (error) {
     next('get home products error');
+  }
+}
+// search Products handler
+async function searcchProductsHandler(req, res, next) {
+  let {lookupValue} = req.params;
+  lookupValue = lookupValue.toLowerCase();
+  const sequelize = db;
+  try {
+    const matchedProducts = await abayaCollection.model.findAll({
+      // limit: 10,
+          where: {
+              code: sequelize.where(sequelize.fn('LOWER', sequelize.col('code')), 'LIKE', '%' + lookupValue + '%')
+          }
+    });
+    res.status(200).send(matchedProducts);
+  } catch (error) {
+    next('search products error');
   }
 }
 
