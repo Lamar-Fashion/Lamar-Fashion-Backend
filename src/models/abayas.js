@@ -10,6 +10,7 @@ const AbayaSchema = (sequelize, DataTypes) => {
         category: { type: DataTypes.STRING, required: true },
         code: { type: DataTypes.STRING, required: true },
         price: { type: DataTypes.STRING, required: true },
+        discount: { type: DataTypes.STRING },
         status: { type: DataTypes.STRING, required: true },
         description: { type: DataTypes.STRING, required: true },
         inStock: { type: DataTypes.STRING, required: true },

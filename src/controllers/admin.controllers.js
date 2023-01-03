@@ -1,11 +1,11 @@
 // Admin controllers
 
 // import models
-const { favouritCollection, bookedAbayaCollection, abayaCollection, userCollection } = require('../models/index');
+const { favouritCollection, bookedAbayaCollection, abayaCollection, userCollection, adminSettingsCollection } = require('../models/index');
 
 // add new product handler
 async function addProductHandler(req, res, next) {
-  const { productIamges, category, status, code, description, price, colors, sizes, totalInStock, addToHomePage } = req.body;
+  const { productIamges, category, status, code, description, price, discount, colors, sizes, totalInStock, addToHomePage } = req.body;
 
   const product = {
     colors: colors,
@@ -14,6 +14,7 @@ async function addProductHandler(req, res, next) {
     category: category,
     code: code,
     price: price,
+    discount: discount,
     status: status,
     description: description,
     inStock: totalInStock,
@@ -29,7 +30,7 @@ async function addProductHandler(req, res, next) {
   } catch (e) {
     next('add product error');
   }
-}
+};
 //edit product handler
 async function editProductHandler(req, res, next) {
   try {
@@ -41,7 +42,7 @@ async function editProductHandler(req, res, next) {
   } catch (e) {
     next('edit product error');
   }
-}
+};
 //delete product handler
 async function deleteProductHandler(req, res, next) {
   try {
@@ -53,7 +54,7 @@ async function deleteProductHandler(req, res, next) {
   } catch (e) {
     next('delete product error');
   }
-}
+};
 //get pending orders handler
 async function getPendingOrdersHandler(req, res, next) {
   try {
@@ -68,7 +69,7 @@ async function getPendingOrdersHandler(req, res, next) {
   } catch (e) {
     next('get pending orders error');
   }
-}
+};
 
 //get done orders handler
 async function getDoneOrdersHandler(req, res, next) {
@@ -84,7 +85,7 @@ async function getDoneOrdersHandler(req, res, next) {
   } catch (e) {
     next('get done orders error');
   }
-}
+};
 //get rejected orders handler
 async function getRejectedOrdersHandler(req, res, next) {
   try {
@@ -99,7 +100,7 @@ async function getRejectedOrdersHandler(req, res, next) {
   } catch (e) {
     next('get rejected orders error');
   }
-}
+};
 //get all users handler
 async function getAllUsersHandler(req, res, next) {
   try {
@@ -110,27 +111,83 @@ async function getAllUsersHandler(req, res, next) {
   } catch (e) {
     next('get all users error');
   }
-}
+};
 
 //edit order handler
 async function editOrderHandler(req, res, next) {
   try {
     const {id} =req.params;
     // edit product 
-    const response = await bookedAbayaCollection.update(id,req.body);
+    const response = await bookedAbayaCollection.update(id, req.body);
     // return the object to the client
     res.status(201).send(response);
   } catch (e) {
     next('edit order error');
   }
-}
+};
+
+//get admin settings handler
+async function getAdminSettingsHandler(req, res, next) {
+  try {
+    // get settings
+    const response = await adminSettingsCollection.read();
+
+    res.status(200).send(response);
+  } catch (e) {
+    next('get admin settings error');
+  }
+};
+// add admin settings handler
+async function addAdminSettingsHandler(req, res, next) {
+  const { signInDiscount, promoCodes, hero, collection } = req.body;
+
+  const adminSettings = {
+    signInDiscount,
+    promoCodes,
+    hero,
+    collection,
+  };
+  try {
+    // save object
+    const response = await adminSettingsCollection.create(adminSettings, next);
+
+    // return the object to the client
+    res.status(201).send(response);
+  } catch (e) {
+    next('post admin settings error', e);
+  }
+};
+//edit admin settings handler
+async function editAdminSettingsHandler(req, res, next) {
+  try {
+    const { id } = req.params;
+    const { signInDiscount, promoCodes, hero, collection } = req.body;
+
+    const adminSettings = {
+      signInDiscount,
+      promoCodes,
+      hero,
+      collection,
+    };
+    // edit record 
+    const response = await adminSettingsCollection.update(id, adminSettings);
+    // return the object to the client
+    res.status(201).send(response);
+  } catch (e) {
+    next('edit admin settings error', e);
+  }
+};
+
 module.exports = {
   addProductHandler,
-    editProductHandler,
-    deleteProductHandler,
-    editOrderHandler,
-    getPendingOrdersHandler,
-    getDoneOrdersHandler,
-    getRejectedOrdersHandler,
-    getAllUsersHandler,
+  editProductHandler,
+  deleteProductHandler,
+  editOrderHandler,
+  getPendingOrdersHandler,
+  getDoneOrdersHandler,
+  getRejectedOrdersHandler,
+  getAllUsersHandler,
+  getAdminSettingsHandler,
+  addAdminSettingsHandler,
+  editAdminSettingsHandler
 };

@@ -5,6 +5,7 @@ const abayas = require('./abayas');
 const bookedAbaya = require('./bookedAbayas');
 const favourite = require('./favourite');
 const users = require('./users');
+const adminSettings = require('./adminSettings');
 const Collection = require('./dataCollection');
 console.log('users', users);
 
@@ -27,12 +28,14 @@ const abayaModel = abayas(sequelize, DataTypes);
 const bookedAbayaModel = bookedAbaya(sequelize, DataTypes);
 const favouriteModel = favourite(sequelize, DataTypes);
 const userModel = users(sequelize, DataTypes);
+const adminSettingsModel = adminSettings(sequelize, DataTypes);
 
 // collections
 const userCollection = new Collection(userModel);
 const favouritCollection = new Collection(favouriteModel);
 const bookedAbayaCollection = new Collection(bookedAbayaModel);
 const abayaCollection = new Collection(abayaModel);
+const adminSettingsCollection = new Collection(adminSettingsModel);
 
 module.exports = {
   db: sequelize,
@@ -40,4 +43,5 @@ module.exports = {
   favouritCollection,
   bookedAbayaCollection,
   abayaCollection,
+  adminSettingsCollection
 };

@@ -8,6 +8,7 @@ const { db } = require('./src/models/index');
 
 // start the server
 db.sync().then(() => {
+// db.sync({force: true}).then(() => {
     start(PORT);
 }).catch(error =>{
     console.log('Connection DB Error',error);

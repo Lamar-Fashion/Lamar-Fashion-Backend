@@ -21,6 +21,9 @@ const {
     getDoneOrdersHandler,
     getRejectedOrdersHandler,
     getAllUsersHandler,
+    getAdminSettingsHandler,
+    addAdminSettingsHandler,
+    editAdminSettingsHandler
 } = require('../controllers/admin.controllers');
 
 // admin routes
@@ -32,5 +35,9 @@ adminRouter.get('/pendingOrders', bearerAuth, permissions('read'), getPendingOrd
 adminRouter.get('/doneOrders', bearerAuth, permissions('read'), getDoneOrdersHandler);
 adminRouter.get('/rejectedOrders', bearerAuth, permissions('read'), getRejectedOrdersHandler);
 adminRouter.get('/users', bearerAuth, permissions('read'), getAllUsersHandler);
+adminRouter.get('/adminSettings', bearerAuth, permissions('read'), getAdminSettingsHandler);
+adminRouter.post('/adminSettings', bearerAuth, permissions('write'), addAdminSettingsHandler);
+adminRouter.put('/adminSettings:id', bearerAuth, permissions('edit'), editAdminSettingsHandler);
+
 
 module.exports = adminRouter;

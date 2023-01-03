@@ -26,6 +26,9 @@ module.exports = {
       price: {
         type: Sequelize.STRING
       },
+      discount: {
+        type: Sequelize.STRING
+      },
       status: {
         type: Sequelize.STRING
       },

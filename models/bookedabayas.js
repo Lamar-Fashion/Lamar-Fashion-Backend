@@ -19,7 +19,8 @@ module.exports = (sequelize, DataTypes) => {
     totalPrice: DataTypes.STRING,
     paymentMethod: DataTypes.STRING,
     orderStatus: DataTypes.STRING,
-    orderId: DataTypes.STRING
+    orderId: DataTypes.STRING,
+    rejectionNote: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'bookedAbayas',

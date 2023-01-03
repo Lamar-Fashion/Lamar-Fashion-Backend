@@ -38,7 +38,6 @@ const userSchema = (sequelize, DataTypes) => {
 
   // before save method
   Schema.beforeCreate(async (user) => {
-    console.log('from createeeeeeee');
     if(!user?.password) return;
     try {
       const hashedPassword = await bcrypt.hash(user.password, 10);

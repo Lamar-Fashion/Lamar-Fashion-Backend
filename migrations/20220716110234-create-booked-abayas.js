@@ -26,6 +26,9 @@ module.exports = {
       orderId: {
         type: Sequelize.STRING
       },
+      rejectionNote: {
+        type: Sequelize.STRING
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
