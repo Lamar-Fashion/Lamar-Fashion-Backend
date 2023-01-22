@@ -3,12 +3,13 @@
 const express = require('express');
 const { v4: uuidv4 } = require('uuid');
 const {db} = require('../models/index');
+const { checkProductDiscounts } = require('../helpers');
 
 // use express Router
 const apiRouter = express.Router();
 
 // import models
-const { favouritCollection, bookedAbayaCollection, abayaCollection } = require('../models/index');
+const { favouritCollection, bookedAbayaCollection, abayaCollection, userCollection, adminSettingsCollection } = require('../models/index');
 
 // import basicAuth middleware
 const bearerAuth = require('../middlewares/bearerAuth');
@@ -24,6 +25,7 @@ apiRouter.post('/addToCart', addToCartHandler);
 apiRouter.get('/allProducts', allProductsHandler);
 apiRouter.get('/homePageProducts', homePageProductsHandler);
 apiRouter.get('/search/:lookupValue', searcchProductsHandler);
+apiRouter.get('/adminSettings', getAdminSettingsHandler);
 
 // add To Favourite Handler
 async function addToFavouriteHandler(req, res, next) {
@@ -56,7 +58,7 @@ if (favFromDB) {
   } catch (e) {
     next('add to favourite error');
   }
-}
+};
 // get favourites handler
 async function getFavouriteHandler(req, res, next) {
   const {userId} = req.params;
@@ -97,7 +99,7 @@ let freeDeletedIds = [];
   } catch (error) {
     next('get favourites error');
   }
-}
+};
 // remove favourites handler
 async function removeFavouriteHandler(req, res, next) {
   const {userId,id} = req.params;
@@ -119,44 +121,65 @@ userFavRecord.abayaId= newAbayaIds;
   } catch (error) {
     next('remove favourite error');
   }
-}
+};
 
 // add To cart Handler
 async function addToCartHandler(req, res, next) {
   try {
+    const { productInfo, personalInfo,totalPrice  } = req.body;
 
-  const { productInfo, personalInfo,totalPrice  } = req.body;
-  let currentdate = new Date(); 
-let datetime = currentdate.getDate() + "/"
-                + (currentdate.getMonth()+1)  + "/" 
-                + currentdate.getFullYear() + "@"  
-                + currentdate.getHours() + ":"  
-                + currentdate.getMinutes() + ":" 
-                + currentdate.getSeconds();
+    //check if the user logged-in or not. so he can benefit sign-in discount.
+    let isLoggedIn = false;
+    let signInDiscount = 0;
+    if (req.headers.authorization) {
+      const token = req.headers.authorization.split(' ').pop();
+      // check the token with the original one by the username & the SECRET
+      const validUser = await userCollection.model.authenticateToken(token);
+  
+      if (validUser) {
+        isLoggedIn = true;
+      }
 
-  const orderId = uuidv4().slice(0,6).toUpperCase()+ "-" + datetime ;
-  let order = {
-    productInfo,
-    personalInfo,
-    totalPrice,
-    orderId
-  }
-  let total = 0;
-// validate total price
-for (let i = 0; i < productInfo.length; i++) {
-  total= total +  productInfo[i].quantity * Number(productInfo[i].price);
-}
-if (total !== totalPrice) return next('invalid total price!');
+      // get admin settings to check `signinDiscount` percentage.
+      const response = await adminSettingsCollection.read();
+      signInDiscount = response[0].dataValues.signInDiscount;
+    }
 
-    // save the order
-    const response = await bookedAbayaCollection.create(order,next);
+    let currentdate = new Date(); 
+    let datetime = currentdate.getDate() + "/"
+                  + (currentdate.getMonth()+1)  + "/" 
+                  + currentdate.getFullYear() + "@"  
+                  + currentdate.getHours() + ":"  
+                  + currentdate.getMinutes() + ":" 
+                  + currentdate.getSeconds();
 
-    // return the object  to the client
-    res.status(201).send(response);
+    const orderId = uuidv4().slice(0,6).toUpperCase()+ "-" + datetime ;
+    let order = {
+      productInfo,
+      personalInfo,
+      totalPrice,
+      orderId
+    };
+    let total = 0;
+    //add delivery fees 50 QAR.
+    total = 50;
+    // validate total price
+    for (let i = 0; i < productInfo.length; i++) {
+      const price = productInfo[i].price;
+      const discount = productInfo[i].discount;
+      total = total +  productInfo[i].quantity * checkProductDiscounts(price, isLoggedIn, signInDiscount, discount);
+    }
+    if (total !== totalPrice) return next('invalid total price!');
+
+        // save the order
+        const response = await bookedAbayaCollection.create(order,next);
+
+        // return the object  to the client
+        res.status(201).send(response);
   } catch (e) {
     next('submit order - server error');
-  }
-}
+  };
+};
 
 // get all Products handler
 async function allProductsHandler(req, res, next) {
@@ -167,7 +190,7 @@ async function allProductsHandler(req, res, next) {
   } catch (error) {
     next('get all products error');
   }
-}
+};
 // get home page Products handler
 async function homePageProductsHandler(req, res, next) {
   try {
@@ -181,7 +204,7 @@ async function homePageProductsHandler(req, res, next) {
   } catch (error) {
     next('get home products error');
   }
-}
+};
 // search Products handler
 async function searcchProductsHandler(req, res, next) {
   let {lookupValue} = req.params;
@@ -198,6 +221,18 @@ async function searcchProductsHandler(req, res, next) {
   } catch (error) {
     next('search products error');
   }
-}
+};
+
+//get admin settings handler
+async function getAdminSettingsHandler(req, res, next) {
+  try {
+    // get settings
+    const response = await adminSettingsCollection.read();
+
+    res.status(200).send(response);
+  } catch (e) {
+    next('get admin settings error');
+  }
+};
 
 module.exports = apiRouter;

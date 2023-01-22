@@ -126,17 +126,7 @@ async function editOrderHandler(req, res, next) {
   }
 };
 
-//get admin settings handler
-async function getAdminSettingsHandler(req, res, next) {
-  try {
-    // get settings
-    const response = await adminSettingsCollection.read();
 
-    res.status(200).send(response);
-  } catch (e) {
-    next('get admin settings error');
-  }
-};
 // add admin settings handler
 async function addAdminSettingsHandler(req, res, next) {
   const { signInDiscount, promoCodes, hero, collection } = req.body;
@@ -187,7 +177,6 @@ module.exports = {
   getDoneOrdersHandler,
   getRejectedOrdersHandler,
   getAllUsersHandler,
-  getAdminSettingsHandler,
   addAdminSettingsHandler,
   editAdminSettingsHandler
 };
