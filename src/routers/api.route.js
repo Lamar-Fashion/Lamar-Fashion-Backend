@@ -3,7 +3,7 @@
 const express = require('express');
 const { v4: uuidv4 } = require('uuid');
 const {db} = require('../models/index');
-const { checkProductDiscounts } = require('../helpers');
+const { checkProductDiscounts, checkExpirationDate } = require('../helpers');
 
 // use express Router
 const apiRouter = express.Router();
@@ -21,11 +21,12 @@ const permissions = require('../middlewares/acl');
 apiRouter.post('/favourite', bearerAuth, addToFavouriteHandler);
 apiRouter.get('/favourite/:userId', bearerAuth,  getFavouriteHandler);
 apiRouter.delete('/favourite/:userId/:id', bearerAuth, removeFavouriteHandler);
-apiRouter.post('/addToCart', addToCartHandler);
+apiRouter.post('/addToCart', checkPromoExists, validatePromoCode, addToCartHandler);
 apiRouter.get('/allProducts', allProductsHandler);
 apiRouter.get('/homePageProducts', homePageProductsHandler);
 apiRouter.get('/search/:lookupValue', searcchProductsHandler);
 apiRouter.get('/adminSettings', getAdminSettingsHandler);
+apiRouter.post('/promoCode', validatePromoCode, applyPromoCodeHandler);
 
 // add To Favourite Handler
 async function addToFavouriteHandler(req, res, next) {
@@ -126,7 +127,7 @@ userFavRecord.abayaId= newAbayaIds;
 // add To cart Handler
 async function addToCartHandler(req, res, next) {
   try {
-    const { productInfo, personalInfo,totalPrice  } = req.body;
+    const { productInfo, personalInfo, totalPrice, promoCodeValidationResponse, totalPromoApplied, phoneNumber } = req.body;
 
     //check if the user logged-in or not. so he can benefit sign-in discount.
     let isLoggedIn = false;
@@ -171,10 +172,37 @@ async function addToCartHandler(req, res, next) {
     }
     if (total !== totalPrice) return next('invalid total price!');
 
-        // save the order
-        const response = await bookedAbayaCollection.create(order,next);
+    //check if promo code exists with this order
+    if (promoCodeValidationResponse && !promoCodeValidationResponse.error && promoCodeValidationResponse.promoCode) {
+      //compare and validate promo discount on total price after all discounts
+      let totalPriceWithPromoDiscount = total - (total-50)*(Number(promoCodeValidationResponse.promoCode.discountPercentage)/100);
+      //round it up to nearest 5
+      totalPriceWithPromoDiscount = Math.ceil(totalPriceWithPromoDiscount/5)*5;
+      if (totalPriceWithPromoDiscount !== totalPromoApplied) return next('invalid total price promo code.');
+      //save promo info data to the order object.
+      order.promoCodeInfo = {
+        isPromoCodeUsed: true,
+        promoCode: promoCodeValidationResponse.promoCode,
+        totalPromoApplied: totalPriceWithPromoDiscount
+      };
 
-        // return the object  to the client
+      // get admin settings to update used "promoCode"
+      const response = await adminSettingsCollection.read();
+      const adminSettings = response[0].dataValues;
+      adminSettings.promoCodes.forEach(promo => {
+        if (promo.code == promoCodeValidationResponse.promoCode.code) {
+          promo.counter = promo.counter + 1;
+          promo.usedByPhoneNumbers.push(phoneNumber);
+        }
+      });
+      await adminSettingsCollection.update(adminSettings.id, adminSettings);
+
+    }
+
+        // save the order
+        const response = await bookedAbayaCollection.create(order, next);
+
+        // return the object to the client
         res.status(201).send(response);
   } catch (e) {
     next('submit order - server error');
@@ -227,12 +255,161 @@ async function searcchProductsHandler(req, res, next) {
 async function getAdminSettingsHandler(req, res, next) {
   try {
     // get settings
-    const response = await adminSettingsCollection.read();
+    const adminSettingsArr = await adminSettingsCollection.read();
+    const adminSettings = adminSettingsArr[0]?.dataValues;
+    //check and update promo codes.
+    let isChanged;
+    adminSettings.promoCodes.forEach(promo => {
+      //check expiration date
+      if (promo.expirationDate) {
+        const isPromoExpired = checkExpirationDate(promo.expirationDate, new Date());
+        if (isPromoExpired) {
+          //mark the promo isActive: "false"
+          promo.isActive = false;
+          isChanged = true;
+        }
+      }
+      //check if max limit reached so mark the promo as inActive
+      if (promo.type === "maxLimit" && promo.maxLimit <= promo.counter) {
+        promo.isActive = false;
+        isChanged = true;
+      }
+    });
 
-    res.status(200).send(response);
+    if (isChanged) {
+      const updatedSettings = await adminSettingsCollection.update(adminSettings.id, adminSettings);
+
+      res.status(200).send(updatedSettings.dataValues);
+      
+    } else {
+      res.status(200).send(adminSettings);
+    }
+
+
   } catch (e) {
     next('get admin settings error');
   }
+};
+
+//validate promo code
+async function validatePromoCode (req, res, next) {
+  const { code, phoneNumber } = req.body;
+  const errorMsg = 'Apply Promo Code Error!';
+  const promoCodeValidationResponse = {
+    error: "Invalid Promo Code.",
+    promoCode: null
+  };
+  const handleMiddlewareResponse = function (responseObj, promoCode, error) {
+    responseObj.error = error;
+    responseObj.promoCode = promoCode;
+    req.body.promoCodeValidationResponse = responseObj;
+    next();
+  };
+  if (!code && !phoneNumber) {
+    return handleMiddlewareResponse(promoCodeValidationResponse, null, "Promo Code not attached.");
+  }
+  try {
+    //get admin settings to check the promo.
+    const adminSettingsArr = await adminSettingsCollection.read();
+    const adminSettings = adminSettingsArr[0]?.dataValues;
+    if (!adminSettings) {
+      return next(errorMsg);
+    }
+    const promoCodes = adminSettings.promoCodes;
+    let matchedPromo;
+    //check if promo exists
+    promoCodes.forEach(promo => {
+      if (promo.code === code) {
+        matchedPromo = promo;
+      }
+    });
+
+    if (!matchedPromo) {
+      return handleMiddlewareResponse(promoCodeValidationResponse, null, errorMsg);
+    }
+
+    if (!matchedPromo.isActive) {
+      return handleMiddlewareResponse(promoCodeValidationResponse, null, errorMsg);
+    }
+
+    //check expiration date
+    if (matchedPromo.expirationDate) {
+      const isPromoExpired = checkExpirationDate(matchedPromo.expirationDate, new Date());
+      if (isPromoExpired) {
+        //mark the promo isActive: "false"
+        adminSettings.promoCodes.forEach(promo => {
+          if (promo.code === matchedPromo.code) {
+            promo.isActive = false;
+          }
+        });
+        await adminSettingsCollection.update(adminSettings.id, adminSettings);
+        return handleMiddlewareResponse(promoCodeValidationResponse, null, errorMsg);
+      }
+    }
+
+    switch (matchedPromo.type) {
+      case "noLimit":
+        return handleMiddlewareResponse(promoCodeValidationResponse, matchedPromo, null);
+        break;
+      case "maxLimit":
+        if (matchedPromo.maxLimit > matchedPromo.counter) {
+          return handleMiddlewareResponse(promoCodeValidationResponse, matchedPromo, null);
+        }
+        //check if max limit reached so mark the promo as inActive
+        if (matchedPromo.maxLimit <= matchedPromo.counter) {
+          const adminSettingsArr = await adminSettingsCollection.read();
+          const adminSettings = adminSettingsArr[0]?.dataValues;
+          adminSettings.promoCodes.forEach(promo => {
+            if (promo.code === matchedPromo.code) {
+              promo.isActive = false;
+            }
+          });
+          await adminSettingsCollection.update(adminSettings.id, adminSettings);
+        }
+        break;
+      case "oneTimeUse":
+        if (!phoneNumber) {
+          return handleMiddlewareResponse(promoCodeValidationResponse, null, errorMsg);
+        }
+
+        if (matchedPromo.usedByPhoneNumbers.includes(phoneNumber)) {
+          return handleMiddlewareResponse(promoCodeValidationResponse, null, errorMsg);
+        }
+        //otherwise it's a valid promo.
+        return handleMiddlewareResponse(promoCodeValidationResponse, matchedPromo, null);
+        break;
+    
+      default:
+        break;
+    }
+
+    //send error if no case matched.
+    return handleMiddlewareResponse(promoCodeValidationResponse, null, errorMsg);
+
+  } catch (err) {
+    next(errorMsg);
+  }
+
+};
+
+//apply Promo Code Handler
+async function applyPromoCodeHandler (req, res, next) {
+  const { promoCodeValidationResponse } = req.body;
+  if (!promoCodeValidationResponse?.error && promoCodeValidationResponse?.promoCode) {
+    res.status(200).send(promoCodeValidationResponse.promoCode);
+  } else {
+    next("Apply Promo Code Error..");
+  }
+};
+
+//check if Promo code attached
+async function checkPromoExists (req, res, next) {
+  const {verifiedPromoCode, totalPromoApplied, personalInfo} = req.body;
+  if (verifiedPromoCode && totalPromoApplied) {
+    req.body.code = verifiedPromoCode.code;
+    req.body.phoneNumber = personalInfo?.phone;
+  }
+  next();
 };
 
 module.exports = apiRouter;

@@ -6,6 +6,7 @@ const BookedAbayaSchema = (sequelize, DataTypes) => {
     productInfo: { type: DataTypes.ARRAY(DataTypes.JSON), required: true, defaultValue: [] },
     personalInfo: { type: DataTypes.JSON, defaultValue: {}, required: true },
     totalPrice: { type: DataTypes.STRING, required: true },
+    promoCodeInfo: { type: DataTypes.JSON, defaultValue: {isPromoCodeUsed: false, promoCode: {}, totalPromoApplied: null }, required: true },
     paymentMethod: { type: DataTypes.STRING, required: true, defaultValue: 'cash on delivery' },
     orderStatus: { type: DataTypes.STRING, required: true, defaultValue: 'pending' },
     orderId: { type: DataTypes.STRING, required: true },
