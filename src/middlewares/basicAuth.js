@@ -22,7 +22,6 @@ module.exports = async (req, res, next) => {
     req.user = await userCollection.model.authenticateBasic(user, pass);
     next();
   } catch (e) {
-    console.log('eeeee',e);
     errorByAuthentication();
   }
 

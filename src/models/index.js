@@ -7,7 +7,6 @@ const favourite = require('./favourite');
 const users = require('./users');
 const adminSettings = require('./adminSettings');
 const Collection = require('./dataCollection');
-console.log('users', users);
 
 let sequelizeOptions = {  dialectOptions: {
   ssl: {
@@ -19,8 +18,6 @@ let sequelizeOptions = {  dialectOptions: {
 process.env.NODE_ENV == 'development' ? sequelizeOptions= {} : sequelizeOptions;
 // sequelizeOptions= {};
 const POSTGRES_URI = process.env.DATABASE_URL || 'postgres://localhost:5432/lamar';
-console.log('process.env.NODE_ENV',process.env.NODE_ENV);
-console.log('sequelizeOptions',sequelizeOptions);
 const sequelize = new Sequelize(POSTGRES_URI, sequelizeOptions);
 
 // models

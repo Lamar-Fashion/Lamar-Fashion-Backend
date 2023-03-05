@@ -63,7 +63,6 @@ const userSchema = (sequelize, DataTypes) => {
 
   // authenticate basic check the user is exists or not, then check the password
   Schema.authenticateBasic = async function (email, password) {
-    console.log('email, password',email,password);
     try {
       const user = await this.findOne({ where: { email } });
       const valid = await bcrypt.compare(password, user.password);

@@ -23,7 +23,6 @@ async function signUpHandler(req, res, next) {
   try {
     // save user object
     const userRecord = await userCollection.create(req.body,next);
-    console.log('userRecord', userRecord);
     // get the user object and its token
     const output = {
       user: userRecord,

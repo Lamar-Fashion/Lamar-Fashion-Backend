@@ -23,7 +23,6 @@ async function addProductHandler(req, res, next) {
   try {
     // save product object
     const response = await abayaCollection.create(product,next);
-    console.log('response', response);
 
     // return the object to the client
     res.status(201).send(response);
