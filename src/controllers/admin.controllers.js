@@ -1,7 +1,9 @@
-// Admin controllers
-
-// import models
-const { favouritCollection, bookedAbayaCollection, abayaCollection, userCollection, adminSettingsCollection } = require('../models/index');
+const { generateWishlistAvailableMessage, generateWishlistAvailableHTMLMessage } = require('../helpers');
+const { nodemailerCaller } = require('../lib/nodemailer');
+const { Op, favouritCollection, bookedAbayaCollection, abayaCollection, userCollection, adminSettingsCollection } = require('../models/index');
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
+const client = require('twilio')(accountSid, authToken);
 
 // add new product handler
 async function addProductHandler(req, res, next) {
@@ -34,6 +36,71 @@ async function addProductHandler(req, res, next) {
 async function editProductHandler(req, res, next) {
   try {
     const {id} =req.params;
+    //get abaya
+    const resp = await abayaCollection.read("id", id);
+    const abayaBefore = resp[0].dataValues;
+    
+    //check if this item was out of stock
+    if (abayaBefore && abayaBefore.inStock == 0) {
+      //check if it's in stock now
+      if (req.body.inStock > 0) {
+        //get all users that have this item as favorite to notify them.
+        const recordsArr = await favouritCollection.model.findAll({
+          attributes: ['userId'],
+          where: {
+            abayaId: { [Op.contains]: [id] }
+          }
+        });
+        const userIds = [];
+        recordsArr.forEach(record => {
+          userIds.push(record.dataValues.userId);
+        });
+
+        if (userIds.length) {
+          //get user email/phone to notify them.
+          const dataArr = await userCollection.model.findAll({
+            attributes: ['email' ,'phoneNumber'],
+            where: {
+              id: userIds
+            }
+          });
+          const usersPhoneNumbers = [];
+          const usersEmails = [];
+          dataArr.forEach(user => {
+            usersPhoneNumbers.push(user.dataValues.phoneNumber);
+            usersEmails.push(user.dataValues.email);
+          });
+          const wishlistAvailableMessage = generateWishlistAvailableMessage(req.body);
+          const wishlistAvailableMessageHTML = generateWishlistAvailableHTMLMessage(req.body);
+
+          const messageObj = {
+            subject: "Lamar Fashion - Wishlist Product Available!",
+            text: wishlistAvailableMessage,
+            html: wishlistAvailableMessageHTML
+          }
+
+          //notify users by email if found
+          if (usersEmails.length) {
+            nodemailerCaller(messageObj, usersEmails).catch(console.error);
+          }
+          //notify users by Whatsapp api
+          if (usersPhoneNumbers.length) {
+            //loop over phone numbers to send whatsapp messages.
+            for (let i = 0; i < usersPhoneNumbers.length; i++) {
+              client.messages
+              .create({
+                from: `whatsapp:${process.env.Twilio_Phone_Number_Sender_WHATSAPP}`,
+                body: "Lamar Fashion - Wishlist Product Available!\n\n" + wishlistAvailableMessage,
+                to: `whatsapp:${usersPhoneNumbers[i]}`
+              })
+              .then(message => console.log('whatsapp message sent: ', message.sid))
+              .catch(err => console.error(err));
+              
+            };
+          }
+        }
+      }
+    }
     // edit product 
     const response = await abayaCollection.update(id,req.body);
     // return the object to the client

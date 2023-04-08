@@ -1,6 +1,6 @@
 'use strict';
 require('dotenv').config();
-const { Sequelize, DataTypes } = require('sequelize');
+const { Sequelize, DataTypes, Op } = require('sequelize');
 const abayas = require('./abayas');
 const bookedAbaya = require('./bookedAbayas');
 const favourite = require('./favourite');
@@ -36,6 +36,7 @@ const adminSettingsCollection = new Collection(adminSettingsModel);
 
 module.exports = {
   db: sequelize,
+  Op,
   userCollection,
   favouritCollection,
   bookedAbayaCollection,

@@ -18,6 +18,7 @@ module.exports = (sequelize, DataTypes) => {
     personalInfo: DataTypes.JSON,
     totalPrice: DataTypes.STRING,
     promoCodeInfo: DataTypes.JSON,
+    otherInfo: DataTypes.JSON,
     paymentMethod: DataTypes.STRING,
     orderStatus: DataTypes.STRING,
     orderId: DataTypes.STRING,

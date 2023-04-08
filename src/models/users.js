@@ -10,7 +10,8 @@ const SECRET = process.env.SECRET || 'abuNofal59$#$#';
 const userSchema = (sequelize, DataTypes) => {
   // create userSchema / Table
   const Schema = sequelize.define('users', {
-    email: { type: DataTypes.STRING, required: true, unique: true },
+    phoneNumber: { type: DataTypes.STRING, required: true, unique: true, allowNull: false, validate: {notEmpty: true} },
+    email: { type: DataTypes.STRING, required: false, unique: true },
     firstName: { type: DataTypes.STRING, required: true },
     lastName: { type: DataTypes.STRING, required: true },
     password: { type: DataTypes.STRING, required: true },
@@ -18,7 +19,7 @@ const userSchema = (sequelize, DataTypes) => {
     token: {
       type: DataTypes.VIRTUAL,
       get() {
-        return jwt.sign({ email: this.email, role: this.role, firstName: this.firstName, lastName: this.lastName , password:this.password,id:this.id}, SECRET);
+        return jwt.sign({ email: this.email, phoneNumber: this.phoneNumber, role: this.role, firstName: this.firstName, lastName: this.lastName , password:this.password,id:this.id}, SECRET);
       },
       set(tokenObj) {
         return jwt.sign(tokenObj, SECRET);
@@ -62,9 +63,9 @@ const userSchema = (sequelize, DataTypes) => {
   });
 
   // authenticate basic check the user is exists or not, then check the password
-  Schema.authenticateBasic = async function (email, password) {
+  Schema.authenticateBasic = async function (phoneNumber, password) {
     try {
-      const user = await this.findOne({ where: { email } });
+      const user = await this.findOne({ where: { phoneNumber } });
       const valid = await bcrypt.compare(password, user.password);
       if (valid) {
         return user;
@@ -80,7 +81,7 @@ const userSchema = (sequelize, DataTypes) => {
   Schema.authenticateToken = async function (token) {
     try {
       const parsedToken = await jwt.verify(token, SECRET);
-      const user = this.findOne({ where: { email: parsedToken.email } });
+      const user = this.findOne({ where: { phoneNumber: parsedToken.phoneNumber } });
       if (user) {
         return user;
       }

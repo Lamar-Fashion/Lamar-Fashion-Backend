@@ -3,7 +3,10 @@
 const express = require('express');
 const { v4: uuidv4 } = require('uuid');
 const {db} = require('../models/index');
-const { checkProductDiscounts, checkExpirationDate } = require('../helpers');
+const { checkProductDiscounts, checkExpirationDate, generateOrderSummaryMessage, generateOrderSummaryHTMLMessage } = require('../helpers');
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
+const client = require('twilio')(accountSid, authToken);
 
 // use express Router
 const apiRouter = express.Router();
@@ -16,6 +19,10 @@ const bearerAuth = require('../middlewares/bearerAuth');
 
 // access control list middleware
 const permissions = require('../middlewares/acl');
+const { nodemailerCaller } = require('../lib/nodemailer');
+
+//save OTPs to verify. phoneNumber:OTP pairs
+const OTPs = new Map();
 
 // api routes
 apiRouter.post('/favourite', bearerAuth, addToFavouriteHandler);
@@ -27,6 +34,8 @@ apiRouter.get('/homePageProducts', homePageProductsHandler);
 apiRouter.get('/search/:lookupValue', searcchProductsHandler);
 apiRouter.get('/adminSettings', getAdminSettingsHandler);
 apiRouter.post('/promoCode', validatePromoCode, applyPromoCodeHandler);
+apiRouter.post('/sendOTP', sendOTPHandler);
+apiRouter.post('/verifyOTP', verifyOTPHandler);
 
 // add To Favourite Handler
 async function addToFavouriteHandler(req, res, next) {
@@ -36,23 +45,23 @@ async function addToFavouriteHandler(req, res, next) {
   try {
     let favFromDB = await favouritCollection.model.findOne({where:{userId:userId.toString() }});
     let favObj ,response;
-if (favFromDB) {
+  if (favFromDB) {
 
-  if(favFromDB.abayaId.includes(abayaId.toString())) return res.status(200).send({msg:'already in your wishlist'});
-  // prevent duplicates items
-  !favFromDB.abayaId.includes(abayaId.toString()) ? favFromDB.abayaId = [...favFromDB.abayaId,abayaId.toString()] : null;
+    if(favFromDB.abayaId.includes(abayaId.toString())) return res.status(200).send({msg:'already in your wishlist'});
+    // prevent duplicates items
+    !favFromDB.abayaId.includes(abayaId.toString()) ? favFromDB.abayaId = [...favFromDB.abayaId,abayaId.toString()] : null;
 
-  //update the obj
-  response = await favFromDB.save();
-}else{
-  favObj = {
-    userId,
-    abayaId: [abayaId.toString()]
+    //update the obj
+    response = await favFromDB.save();
+  }else{
+    favObj = {
+      userId,
+      abayaId: [abayaId.toString()]
+    }
+
+    // save first favourite record for this user
+    response = await favouritCollection.create(favObj,next);
   }
-
-  // save first favourite record for this user
-  response = await favouritCollection.create(favObj,next);
-}
      
     // return the object  to the client
     res.status(200).send(response);
@@ -64,7 +73,7 @@ if (favFromDB) {
 async function getFavouriteHandler(req, res, next) {
   const {userId} = req.params;
   try {
-    const userFavRecord = await favouritCollection.read(userId);
+    const userFavRecord = await favouritCollection.read("userId", userId);
     let allFavItems;
 
 if (userFavRecord && userFavRecord.length > 0 && userFavRecord[0].abayaId && userFavRecord[0].abayaId.length > 0) {
@@ -172,6 +181,18 @@ async function addToCartHandler(req, res, next) {
     }
     if (total !== totalPrice) return next('invalid total price!');
 
+    //update order obj to save sign in discount and product discount if used or existed.
+    const otherInfo = {
+      signInDiscount: {isSignInDiscountUsed: false, discountPercentage: null}
+    };
+
+    if (isLoggedIn && signInDiscount) {
+      otherInfo.signInDiscount.isSignInDiscountUsed = true;
+      otherInfo.signInDiscount.discountPercentage = signInDiscount;
+    }
+
+    order.otherInfo = otherInfo;
+
     //check if promo code exists with this order
     if (promoCodeValidationResponse && !promoCodeValidationResponse.error && promoCodeValidationResponse.promoCode) {
       //compare and validate promo discount on total price after all discounts
@@ -199,11 +220,46 @@ async function addToCartHandler(req, res, next) {
 
     }
 
-        // save the order
-        const response = await bookedAbayaCollection.create(order, next);
+    const orderSummaryMessage = generateOrderSummaryMessage(order);
+    const orderSummaryMessageHTML = generateOrderSummaryHTMLMessage(order);
+    order.otherInfo.orderSummaryMessage = orderSummaryMessage;
+    // save the order
+    const response = await bookedAbayaCollection.create(order, next);
+    //TODO:
+    //un-comment adminEmails.
+    // const adminEmails = [process.env.LAMAR_Eamil_1, process.env.LAMAR_Eamil_2];
+    const adminEmails = [];
+    const userEmail = personalInfo.email;
+    const emailsArray = [...adminEmails, userEmail];
 
-        // return the object to the client
-        res.status(201).send(response);
+    const messageObj = {
+      subject: "Lamar Fashion - Order Summary",
+      text: orderSummaryMessage,
+      html: orderSummaryMessageHTML
+    }
+    //send emails for admin and user with order summary message.
+    nodemailerCaller(messageObj, emailsArray).catch(console.error);
+
+    //notify admin by Whatsapp for the new order
+    //notify the user by his phone number Whatsapp for his order details.
+    const userPhone = personalInfo.phone;
+    // const adminPhone = process.env.LAMAR_Phone_Number; //TODO: add admin phone
+    const whatsappNumbers = [userPhone];
+    //loop over phone numbers to send whatsapp messages.
+    for (let i = 0; i < whatsappNumbers.length; i++) {
+      client.messages
+      .create({
+        from: `whatsapp:${process.env.Twilio_Phone_Number_Sender_WHATSAPP}`,
+        body: "Lamar Fashion - Order Summary\n\n" + orderSummaryMessage,
+        to: `whatsapp:${whatsappNumbers[i]}`
+      })
+      .then(message => console.log('whatsapp message sent: ', message.sid))
+      .catch(err => console.error(err));
+      
+    };
+
+    // return the object to the client
+    res.status(201).send(response);
   } catch (e) {
     next('submit order - server error');
   };
@@ -253,6 +309,7 @@ async function searcchProductsHandler(req, res, next) {
 
 //get admin settings handler
 async function getAdminSettingsHandler(req, res, next) {
+  //TODO: make a private route and authenticate it. remove some data from this opened route. like: promoCodes.
   try {
     // get settings
     const adminSettingsArr = await adminSettingsCollection.read();
@@ -410,6 +467,43 @@ async function checkPromoExists (req, res, next) {
     req.body.phoneNumber = personalInfo?.phone;
   }
   next();
+};
+// send OTP handler
+async function sendOTPHandler (req, res, next) {
+  const {phoneNumber} = req.body;
+  function generateOTP() {
+    const length = 6;
+    let otp = '';
+  
+    for (let i = 0; i < length; i++) {
+      otp += Math.floor(Math.random() * 10);
+    }
+  
+    return otp;
+  };
+  const otp = generateOTP();
+  try {
+    const message = await client.messages.create({
+      body: `Lamar Fashion: Your OTP verification code is: ${otp}`,
+      from: process.env.Twilio_Phone_Number_Sender_SMS, // your Twilio phone number.
+      to: phoneNumber
+    });
+    OTPs.set(phoneNumber, otp);
+    res.status(200).send({OTP: "OTP Sent Successfully!"});
+  } catch (error) {
+    next("Send OTP Error.");
+  }
+};
+
+//verify OTP handler
+async function verifyOTPHandler (req, res, next) {
+  const { phoneNumber, OTP } = req.body;
+  const sentOTP = OTPs.get(phoneNumber);
+  if (sentOTP && sentOTP === OTP) {
+    res.status(200).send({OTP: "OTP Verified Successfully!"});
+  } else {
+    next("Invalid Entered OTP.")
+  }
 };
 
 module.exports = apiRouter;

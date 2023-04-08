@@ -54,13 +54,14 @@ function signInHandler(req, res, next) {
 // update user handler
 async function updateUserHandler(req, res, next) {
   const {id} =req.params;
-  const {firstName,lastName,email,password,oldPassword} =req.body;
+  const {firstName, lastName, email, phoneNumber, password, oldPassword} =req.body;
   try {
  
   let updatedObj = req.user;
   updatedObj.firstName = firstName;
   updatedObj.lastName = lastName;
   updatedObj.email = email;
+  updatedObj.phoneNumber = phoneNumber;
 // check if the user is editing his password or not. password >> represents the new pass, oldPassword >> the old pass.
   if (password && oldPassword) {
 
@@ -84,8 +85,8 @@ async function updateUserHandler(req, res, next) {
     // return the object and token to the client
     res.status(201).send(output);
   } catch (error) {
-    if (error.message == 'Validation error' && error?.errors[0]?.message == 'email must be unique') {
-      next('email already exists!');
+    if (error.message == 'Validation error' && error?.errors[0]?.message == 'phoneNumber must be unique') {
+      next('Phone Number already exists!');
            
          }
     next('update user error');

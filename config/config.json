@@ -1,13 +1,14 @@
 {
   "development": {
-    "use_env_variable": "DATABASE_URL",
     "dialect": "postgres",
-    "dialectOptions": {
-       "ssl": {
-         "require": true,
-         "rejectUnauthorized": false
-       }
-     }
+    "ssl": false,
+    "protocol": "postgres",
+    "host": "localhost",
+    "port": 49153,
+    "username": "postgres",
+    "password": "postgrespw",
+    "database": "postgres"
+
   },
   "test": {
     "username": "root",

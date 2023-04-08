@@ -11,19 +11,19 @@ class Collection {
     } catch (error) {
       console.log(error);
       console.log(error.message);
-      if (error.message == 'Validation error' && error?.errors[0]?.message == 'email must be unique') {
-      next('email already exists!');
+      if (error.message == 'Validation error' && error?.errors[0]?.message == 'phoneNumber must be unique') {
+      next('Phone Number already exists!');
         
       }
       console.error('can not create a new record on ', this.model.name);
     }
   };
 
-  async read(id) {
+  async read(key, value) {
     try {
       let record = null;
-      if (id) {
-        record = await this.model.findAll({ where: { userId: id } });
+      if (key && value) {
+        record = await this.model.findAll({ where: {[key]: value} });
       } else {
         record = await this.model.findAll();
       }
