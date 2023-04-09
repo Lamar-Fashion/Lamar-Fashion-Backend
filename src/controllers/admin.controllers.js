@@ -85,6 +85,7 @@ async function editProductHandler(req, res, next) {
           }
           //notify users by Whatsapp api
           if (usersPhoneNumbers.length) {
+            //TODO: allow Twilio to send messages for unverified numbers.
             //loop over phone numbers to send whatsapp messages.
             for (let i = 0; i < usersPhoneNumbers.length; i++) {
               client.messages
