@@ -30,6 +30,7 @@ apiRouter.get('/favourite/:userId', bearerAuth,  getFavouriteHandler);
 apiRouter.delete('/favourite/:userId/:id', bearerAuth, removeFavouriteHandler);
 apiRouter.post('/addToCart', checkPromoExists, validatePromoCode, addToCartHandler);
 apiRouter.get('/allProducts', allProductsHandler);
+apiRouter.get('/product/:productId', getProductHandler);
 apiRouter.get('/homePageProducts', homePageProductsHandler);
 apiRouter.get('/search/:lookupValue', searcchProductsHandler);
 apiRouter.get('/adminSettings', getAdminSettingsHandler);
@@ -286,6 +287,19 @@ async function allProductsHandler(req, res, next) {
     next('get all products error');
   }
 };
+// get one Product handler
+async function getProductHandler(req, res, next) {
+  const { productId } = req.params;
+  try {
+    const product = await abayaCollection.read("id", productId);
+
+    res.status(200).send(product);
+  } catch (e) {
+    console.error("ERROR - get one product error: ", e);
+    next('get one product error');
+  }
+};
+
 // get home page Products handler
 async function homePageProductsHandler(req, res, next) {
   try {

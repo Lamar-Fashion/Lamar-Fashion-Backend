@@ -37,6 +37,7 @@ function generateOrderSummaryMessage (order) {
     // Loop over the products and concatenate the code and quantity to the string
     for (let i = 0; i < productInfo.length; i++) {
         summary += `- Product Code: ${productInfo[i].code}, Size: ${productInfo[i].size}, Quantity: ${productInfo[i].quantity}, Original Price: ${productInfo[i].price} QAR\n`;
+        summary += `Product Link: ${process.env.Website_URL}/ProductDetails/${productInfo[i].id}\n\n`;
     }
     
     // Add the total price to the string
@@ -74,6 +75,7 @@ function generateOrderSummaryHTMLMessage (order) {
     // Loop over the products and concatenate the code and quantity to the string
     for (let i = 0; i < productInfo.length; i++) {
         summary += `<p>${i+1}- Product Code: ${productInfo[i].code}, Size: ${productInfo[i].size}, Quantity: ${productInfo[i].quantity}, Original Price: ${productInfo[i].price} QAR</p>`;
+        summary += `<p>Product Link: ${process.env.Website_URL}/ProductDetails/${productInfo[i].id}</p>`;
         summary += `<img src="${productInfo[i].images[0]}" alt="product_image" />`;
         summary += `<br/>`;
     }
@@ -117,7 +119,7 @@ function generateOrderSummaryHTMLMessage (order) {
 //generate notification for wishlist becomes available message
 function generateWishlistAvailableMessage (product) {
    
-    let summary = `Great news!\n\nYour wishlist product "${product.code}" is now available. Visit our website ${process.env.Website_URL} to purchase it before it's gone.\n\n`; 
+    let summary = `Great news!\n\nYour wishlist product "${product.code}" is now available. Check Abaya in our website ${process.env.Website_URL}/ProductDetails/${product.id} to purchase it before it's gone.\n\n`; 
 
     summary+= `\n\nThank you for choosing our store!\n`;
     
@@ -136,7 +138,7 @@ function generateWishlistAvailableHTMLMessage (product) {
 
      summary += `<img src="${product.images[0]}" alt="product_image" /> <br/>`;
      
-     summary += `<p>Visit our website ${process.env.Website_URL} to purchase it before it's gone. </p> <br/>`; 
+     summary += `<p>Check Abaya in our website ${process.env.Website_URL}/ProductDetails/${product.id} to purchase it before it's gone. </p> <br/>`; 
 
     summary+= `<p>Thank you for choosing our store!</p> <br/>`;
 
