@@ -21,8 +21,10 @@ authRouter.put('/user:id', bearerAuth, updateUserHandler);
 // signup hndler
 async function signUpHandler(req, res, next) {
   try {
+    //security issues. always register as user role.
+    req.body.role = 'user';
     // save user object
-    const userRecord = await userCollection.create(req.body,next);
+    const userRecord = await userCollection.create(req.body, next);
     // get the user object and its token
     const output = {
       user: userRecord,

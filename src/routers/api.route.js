@@ -360,18 +360,37 @@ async function getAdminSettingsHandler(req, res, next) {
       }
     });
 
+     //check if the adminSettings required by Admin or user. >> so only return promo codes for admin only.
+     let hidePromoCodes = true;
+     let isAdminLoggedIn = false;
+     if (req.headers.authorization) {
+       const token = req.headers.authorization.split(' ').pop();
+       // check the token with the original one by the username & the SECRET
+       const validUser = await userCollection.model.authenticateToken(token);   
+
+       if (validUser && validUser.dataValues && validUser.dataValues.role === 'admin') {
+          isAdminLoggedIn = true;
+          hidePromoCodes = false;
+       }
+     }
+
     if (isChanged) {
       const updatedSettings = await adminSettingsCollection.update(adminSettings.id, adminSettings);
-
+      if (hidePromoCodes && !isAdminLoggedIn) {
+        delete updatedSettings.dataValues.promoCodes;
+      }
       res.status(200).send(updatedSettings.dataValues);
       
     } else {
+      if (hidePromoCodes && !isAdminLoggedIn) {
+        delete adminSettings.promoCodes;
+      }
       res.status(200).send(adminSettings);
     }
 
 
   } catch (e) {
-    console.error("ERROR - fwt admin settings error: ", e);
+    console.error("ERROR - get admin settings error: ", e);
     next('get admin settings error');
   }
 };
