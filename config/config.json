@@ -4,7 +4,7 @@
     "ssl": false,
     "protocol": "postgres",
     "host": "localhost",
-    "port": 49153,
+    "port": 32768,
     "username": "postgres",
     "password": "postgrespw",
     "database": "postgres"

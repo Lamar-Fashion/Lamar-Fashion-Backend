@@ -8,9 +8,11 @@ module.exports = (capability) => {
       if (req.user.capabilities.includes(capability)) {
         next();
       } else {
+        console.error("ERROR - Access Denied");
         next('Access Denied');
       }
     } catch (e) {
+      console.error("ERROR - something wrong: ", e);
       next('something wrong!');
     }
   };

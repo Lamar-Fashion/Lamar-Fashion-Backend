@@ -22,11 +22,12 @@ module.exports = async (req, res, next) => {
     req.user = await userCollection.model.authenticateBasic(user, pass);
     next();
   } catch (e) {
-    errorByAuthentication();
+    errorByAuthentication(e);
   }
 
   // error handler for invalid phoneNumber or password
-  function errorByAuthentication() {
+  function errorByAuthentication(e) {
+    console.error("ERROR - Invalid Phone Number or password: ", e);
     next('Invalid Phone Number or password');
   }
 };

@@ -20,9 +20,10 @@ module.exports = async (req, res, next) => {
   } catch (e) {
     errorByAuthentication(e);
   }
-
+  
   // error handler for invalid token
   function errorByAuthentication(e) {
+    console.error("ERROR - Invalid Token: ", e);
     next('Invalid Token');
   }
 };

@@ -32,7 +32,7 @@ async function signUpHandler(req, res, next) {
     // return the object and token to the client
     res.status(201).send(output);
   } catch (e) {
-    
+    console.error("ERROR - sign-up error: ", e);
     next('sign-up error');
   }
 }
@@ -47,6 +47,7 @@ function signInHandler(req, res, next) {
   try {
     res.status(200).send(user);
   } catch (error) {
+    console.error("ERROR - sign-in server error: ", error);
     next('sign-in server error');
   }
 }
@@ -67,7 +68,7 @@ async function updateUserHandler(req, res, next) {
 
     // validate the old password first, then confirm new pass
     const valid = await bcrypt.compare(oldPassword, req.user.password);
-    valid ? updatedObj.password = password : next('Invalid Old Password!');
+    valid ? updatedObj.password = password : (console.error("ERROR - Invalid Old Password!"), next('Invalid Old Password!'));
   }else{
     updatedObj.passDidnotChanged = true;
   }
@@ -86,9 +87,10 @@ async function updateUserHandler(req, res, next) {
     res.status(201).send(output);
   } catch (error) {
     if (error.message == 'Validation error' && error?.errors[0]?.message == 'phoneNumber must be unique') {
+      console.error("ERROR - Phone Number already exists!: ", error);
       next('Phone Number already exists!');
-           
-         }
+    }
+    console.error("ERROR - update user error: ", error);
     next('update user error');
   }
 }

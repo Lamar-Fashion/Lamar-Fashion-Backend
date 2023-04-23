@@ -29,6 +29,7 @@ async function addProductHandler(req, res, next) {
     // return the object to the client
     res.status(201).send(response);
   } catch (e) {
+    console.error("ERROR - add product error: ", e);
     next('add product error');
   }
 };
@@ -85,7 +86,7 @@ async function editProductHandler(req, res, next) {
           }
           //notify users by Whatsapp api
           if (usersPhoneNumbers.length) {
-            //TODO: allow Twilio to send messages for unverified numbers.
+            //TODO: allow Twilio to send messages for unverified numbers. (seems cuz it's a trial account. on upgrade it will work)
             //loop over phone numbers to send whatsapp messages.
             for (let i = 0; i < usersPhoneNumbers.length; i++) {
               client.messages
@@ -95,7 +96,7 @@ async function editProductHandler(req, res, next) {
                 to: `whatsapp:${usersPhoneNumbers[i]}`
               })
               .then(message => console.log('whatsapp message sent: ', message.sid))
-              .catch(err => console.error(err));
+              .catch(err => console.error("ERROR: Whatsapp API Send notify product available error: ",err));
               
             };
           }
@@ -107,6 +108,7 @@ async function editProductHandler(req, res, next) {
     // return the object to the client
     res.status(201).send(response);
   } catch (e) {
+    console.error("ERROR - edit product error: ", e);
     next('edit product error');
   }
 };
@@ -119,6 +121,7 @@ async function deleteProductHandler(req, res, next) {
     // return deleted object to the client
     res.status(202).json({deletedAt:response});
   } catch (e) {
+    console.error("ERROR - delete product error: ", e);
     next('delete product error');
   }
 };
@@ -134,6 +137,7 @@ async function getPendingOrdersHandler(req, res, next) {
 
     res.status(200).send(response);
   } catch (e) {
+    console.error("ERROR - get pending orders error: ", e);
     next('get pending orders error');
   }
 };
@@ -150,6 +154,7 @@ async function getDoneOrdersHandler(req, res, next) {
 
     res.status(200).send(response);
   } catch (e) {
+    console.error("ERROR - get done orders error: ", e);
     next('get done orders error');
   }
 };
@@ -165,6 +170,7 @@ async function getRejectedOrdersHandler(req, res, next) {
 
     res.status(200).send(response);
   } catch (e) {
+    console.error("ERROR - get rejected orders error: ", e);
     next('get rejected orders error');
   }
 };
@@ -176,6 +182,7 @@ async function getAllUsersHandler(req, res, next) {
 
     res.status(200).send(response);
   } catch (e) {
+    console.error("ERROR - get all users error: ", e);
     next('get all users error');
   }
 };
@@ -189,6 +196,7 @@ async function editOrderHandler(req, res, next) {
     // return the object to the client
     res.status(201).send(response);
   } catch (e) {
+    console.error("ERROR - edit order error: ", e);
     next('edit order error');
   }
 };
@@ -211,6 +219,7 @@ async function addAdminSettingsHandler(req, res, next) {
     // return the object to the client
     res.status(201).send(response);
   } catch (e) {
+    console.error("ERROR - post admin settings error: ", e);
     next('post admin settings error', e);
   }
 };
@@ -231,6 +240,7 @@ async function editAdminSettingsHandler(req, res, next) {
     // return the object to the client
     res.status(201).send(response);
   } catch (e) {
+    console.error("ERROR - edit admin settings error: ", e);
     next('edit admin settings error', e);
   }
 };

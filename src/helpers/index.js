@@ -13,7 +13,8 @@ function checkProductDiscounts (price, isLoggedIn, signInDiscount, productDiscou
     if (productDiscount) {
         totalDiscountPercentage = totalDiscountPercentage + productDiscount;
     }
-    const newPrice = (price*(100 - totalDiscountPercentage))/100;
+    let newPrice = (price*(100 - totalDiscountPercentage))/100;
+    newPrice = Math.floor(newPrice / 5) * 5; //round price to near lowest five.
     return newPrice;
 };
 

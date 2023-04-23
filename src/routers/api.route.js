@@ -66,6 +66,7 @@ async function addToFavouriteHandler(req, res, next) {
     // return the object  to the client
     res.status(200).send(response);
   } catch (e) {
+    console.error("ERROR - add to favourite error: ", e);
     next('add to favourite error');
   }
 };
@@ -106,7 +107,8 @@ let freeDeletedIds = [];
 
 }
 
-  } catch (error) {
+  } catch (e) {
+    console.error("ERROR - get favourites error: ", e);
     next('get favourites error');
   }
 };
@@ -128,7 +130,8 @@ userFavRecord.abayaId= newAbayaIds;
  await userFavRecord.save({ fields: ['abayaId'] });
  let response = await userFavRecord.reload();
     res.status(200).send(response);
-  } catch (error) {
+  } catch (e) {
+    console.error("ERROR - remove favourite error: ", e);
     next('remove favourite error');
   }
 };
@@ -179,7 +182,10 @@ async function addToCartHandler(req, res, next) {
       const discount = productInfo[i].discount;
       total = total +  productInfo[i].quantity * checkProductDiscounts(price, isLoggedIn, signInDiscount, discount);
     }
-    if (total !== totalPrice) return next('invalid total price!');
+    if (total !== totalPrice) {
+      console.error("ERROR - invalid total price!");
+      return next('invalid total price!');
+    }
 
     //update order obj to save sign in discount and product discount if used or existed.
     const otherInfo = {
@@ -199,7 +205,10 @@ async function addToCartHandler(req, res, next) {
       let totalPriceWithPromoDiscount = total - (total-50)*(Number(promoCodeValidationResponse.promoCode.discountPercentage)/100);
       //round it up to nearest 5
       totalPriceWithPromoDiscount = Math.ceil(totalPriceWithPromoDiscount/5)*5;
-      if (totalPriceWithPromoDiscount !== totalPromoApplied) return next('invalid total price promo code.');
+      if (totalPriceWithPromoDiscount !== totalPromoApplied) {
+        console.error("ERROR - invalid total price promo code.");
+        return next('invalid total price promo code.');
+      }
       //save promo info data to the order object.
       order.promoCodeInfo = {
         isPromoCodeUsed: true,
@@ -254,13 +263,14 @@ async function addToCartHandler(req, res, next) {
         to: `whatsapp:${whatsappNumbers[i]}`
       })
       .then(message => console.log('whatsapp message sent: ', message.sid))
-      .catch(err => console.error(err));
+      .catch(err => console.error("ERROR: Whatsapp API Send order summary error: ",err));
       
     };
 
     // return the object to the client
     res.status(201).send(response);
   } catch (e) {
+    console.error("ERROR - submit order - server error: ", e);
     next('submit order - server error');
   };
 };
@@ -271,7 +281,8 @@ async function allProductsHandler(req, res, next) {
     const products = await abayaCollection.read();
 
     res.status(200).send(products);
-  } catch (error) {
+  } catch (e) {
+    console.error("ERROR - get all products error: ", e);
     next('get all products error');
   }
 };
@@ -285,7 +296,8 @@ async function homePageProductsHandler(req, res, next) {
     });
 
     res.status(200).send(products);
-  } catch (error) {
+  } catch (e) {
+    console.error("ERROR - get home products error: ", e);
     next('get home products error');
   }
 };
@@ -302,7 +314,8 @@ async function searcchProductsHandler(req, res, next) {
           }
     });
     res.status(200).send(matchedProducts);
-  } catch (error) {
+  } catch (e) {
+    console.error("ERROR - search products error: ", e);
     next('search products error');
   }
 };
@@ -344,6 +357,7 @@ async function getAdminSettingsHandler(req, res, next) {
 
 
   } catch (e) {
+    console.error("ERROR - fwt admin settings error: ", e);
     next('get admin settings error');
   }
 };
@@ -370,6 +384,7 @@ async function validatePromoCode (req, res, next) {
     const adminSettingsArr = await adminSettingsCollection.read();
     const adminSettings = adminSettingsArr[0]?.dataValues;
     if (!adminSettings) {
+      console.error(`ERROR - ${errorMsg}`);
       return next(errorMsg);
     }
     const promoCodes = adminSettings.promoCodes;
@@ -444,6 +459,7 @@ async function validatePromoCode (req, res, next) {
     return handleMiddlewareResponse(promoCodeValidationResponse, null, errorMsg);
 
   } catch (err) {
+    console.error(`ERROR - ${errorMsg}: `, err);
     next(errorMsg);
   }
 
@@ -455,6 +471,7 @@ async function applyPromoCodeHandler (req, res, next) {
   if (!promoCodeValidationResponse?.error && promoCodeValidationResponse?.promoCode) {
     res.status(200).send(promoCodeValidationResponse.promoCode);
   } else {
+    console.error(`ERROR - Apply Promo Code Error..`);
     next("Apply Promo Code Error..");
   }
 };
@@ -491,6 +508,7 @@ async function sendOTPHandler (req, res, next) {
     OTPs.set(phoneNumber, otp);
     res.status(200).send({OTP: "OTP Sent Successfully!"});
   } catch (error) {
+    console.error("ERROR - Send OTP Error.: ", error);
     next("Send OTP Error.");
   }
 };
@@ -502,6 +520,7 @@ async function verifyOTPHandler (req, res, next) {
   if (sentOTP && sentOTP === OTP) {
     res.status(200).send({OTP: "OTP Verified Successfully!"});
   } else {
+    console.error("ERROR - Invalid Entered OTP");
     next("Invalid Entered OTP.")
   }
 };

@@ -73,7 +73,7 @@ const userSchema = (sequelize, DataTypes) => {
 
       throw new Error('Invalid User');
     } catch (error) {
-      throw new Error('authenticate Basic Faild', error);
+      throw new Error('authenticate Basic Failed', error);
     }
   };
 
@@ -87,7 +87,7 @@ const userSchema = (sequelize, DataTypes) => {
       }
       throw new Error('User not found');
     } catch (error) {
-      throw new Error('authenticate Token Faild', error);
+      throw new Error('authenticate Token Failed', error);
     }
   };
 

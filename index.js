@@ -11,5 +11,5 @@ db.sync().then(() => {
 // db.sync({force: true}).then(() => {
     start(PORT);
 }).catch(error =>{
-    console.log('Connection DB Error',error);
+    console.error('ERROR - Connection DB Error: ', error);
 })
