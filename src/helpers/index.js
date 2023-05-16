@@ -52,7 +52,7 @@ function generateOrderSummaryMessage (order) {
     summary+= `\n\nIf you have any questions or concerns about your order, please don't hesitate to contact us. We're always here to help!\n\nThanks again for choosing our brand. We hope to see you again soon.\n\nBest regards,\n\nLamar Fashion Team.\n`;
 
     // Add the contact details to the string
-    summary += `Phone: ${process.env.LAMAR_Phone_Number}\nEmail: ${process.env.LAMAR_Eamil_1}`;
+    summary += `Phone: ${process.env.LAMAR_Phone_Number}\nEmail: ${process.env.NODE_MAILER_EMAIL_SENDER}`;
 
     return summary;
 };
@@ -76,7 +76,7 @@ function generateOrderSummaryHTMLMessage (order) {
     for (let i = 0; i < productInfo.length; i++) {
         summary += `<p>${i+1}- Product Code: ${productInfo[i].code}, Size: ${productInfo[i].size}, Quantity: ${productInfo[i].quantity}, Original Price: ${productInfo[i].price} QAR</p>`;
         summary += `<p>Product Link: ${process.env.Website_URL}/ProductDetails/${productInfo[i].id}</p>`;
-        summary += `<img src="${productInfo[i].images[0]}" alt="product_image" />`;
+        summary += `<img src="${productInfo[i].images[0]}" style="max-width: 350px; max-height: 450px" alt="product_image2" />`;
         summary += `<br/>`;
     }
     
@@ -112,7 +112,7 @@ function generateOrderSummaryHTMLMessage (order) {
 
     // Add the contact details to the string
     summary += `<p>Phone: ${process.env.LAMAR_Phone_Number}</p>`;
-    summary += `<p>Email: ${process.env.LAMAR_Eamil_1}</p>`;
+    summary += `<p>Email: ${process.env.NODE_MAILER_EMAIL_SENDER}</p>`;
 
     return summary;
 };
@@ -126,7 +126,7 @@ function generateWishlistAvailableMessage (product) {
     summary+= `\n\nLamar Fashion Team.\n`;
 
     // Add the contact details to the string
-    summary += `Phone: ${process.env.LAMAR_Phone_Number}\nEmail: ${process.env.LAMAR_Eamil_1}`;
+    summary += `Phone: ${process.env.LAMAR_Phone_Number}\nEmail: ${process.env.NODE_MAILER_EMAIL_SENDER}`;
 
     return summary;
 };
@@ -146,7 +146,7 @@ function generateWishlistAvailableHTMLMessage (product) {
 
     // Add the contact details to the string
     summary += `<p>Phone: ${process.env.LAMAR_Phone_Number}</p>`;
-    summary += `<p> Email: ${process.env.LAMAR_Eamil_1}</p>`;
+    summary += `<p> Email: ${process.env.NODE_MAILER_EMAIL_SENDER}</p>`;
 
     return summary;
 };

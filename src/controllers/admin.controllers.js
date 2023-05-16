@@ -204,10 +204,12 @@ async function editOrderHandler(req, res, next) {
 
 // add admin settings handler
 async function addAdminSettingsHandler(req, res, next) {
-  const { signInDiscount, promoCodes, hero, collection } = req.body;
+  const { signInDiscount, shippingFees, other, promoCodes, hero, collection } = req.body;
 
   const adminSettings = {
     signInDiscount,
+    shippingFees,
+    other: other ? other : {},
     promoCodes,
     hero,
     collection,
@@ -227,10 +229,12 @@ async function addAdminSettingsHandler(req, res, next) {
 async function editAdminSettingsHandler(req, res, next) {
   try {
     const { id } = req.params;
-    const { signInDiscount, promoCodes, hero, collection } = req.body;
+    const { signInDiscount, shippingFees, other, promoCodes, hero, collection } = req.body;
 
     const adminSettings = {
       signInDiscount,
+      shippingFees,
+      other: other ? other : {},
       promoCodes,
       hero,
       collection,

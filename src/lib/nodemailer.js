@@ -5,7 +5,7 @@ const nodemailer = require("nodemailer");
 async function nodemailerCaller(messageObj, emailsArray) {
     //create transporter object
     const transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
+        host: process.env.NODE_MAILER_EMAIL_HOST_SMTP, //ex:'smtp.gmail.com',
         port: 465,
         secure: true,
         auth: {
@@ -13,19 +13,7 @@ async function nodemailerCaller(messageObj, emailsArray) {
             pass: process.env.NODE_MAILER_PASS_SENDER
         }
     });
-    //TODO:
-    //use lamar email.
-    //for this email: "Info@lamarfashion.qa"
 
-    //   let transporter = nodemailer.createTransport({
-    //     host: 'your_smtp_host',
-    //     port: 465, // or your SMTP port
-    //     secure: true,
-    //     auth: {
-    //       user: 'your_email_address',
-    //       pass: 'your_email_password'
-    //     }
-    //   });
     const mailOptions = {
         from: process.env.NODE_MAILER_EMAIL_SENDER, // sender address
         to: emailsArray.join() , // list of receivers "bar@example.com, baz@example.com"

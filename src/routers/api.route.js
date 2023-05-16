@@ -145,6 +145,11 @@ async function addToCartHandler(req, res, next) {
     //check if the user logged-in or not. so he can benefit sign-in discount.
     let isLoggedIn = false;
     let signInDiscount = 0;
+    let shippingFees = 50;
+    // get admin settings to check `signinDiscount` percentage and get "shippingFees".
+    const adminSettingsDB = await adminSettingsCollection.read();
+    shippingFees = adminSettingsDB[0].dataValues.shippingFees;
+
     if (req.headers.authorization) {
       const token = req.headers.authorization.split(' ').pop();
       // check the token with the original one by the username & the SECRET
@@ -154,9 +159,7 @@ async function addToCartHandler(req, res, next) {
         isLoggedIn = true;
       }
 
-      // get admin settings to check `signinDiscount` percentage.
-      const response = await adminSettingsCollection.read();
-      signInDiscount = response[0].dataValues.signInDiscount;
+      signInDiscount = adminSettingsDB[0].dataValues.signInDiscount;
     }
 
     let currentdate = new Date(); 
@@ -176,7 +179,7 @@ async function addToCartHandler(req, res, next) {
     };
     let total = 0;
     //add delivery fees 50 QAR.
-    total = 50;
+    total += shippingFees;
     // validate total price
     for (let i = 0; i < productInfo.length; i++) {
       const price = productInfo[i].price;
@@ -203,7 +206,7 @@ async function addToCartHandler(req, res, next) {
     //check if promo code exists with this order
     if (promoCodeValidationResponse && !promoCodeValidationResponse.error && promoCodeValidationResponse.promoCode) {
       //compare and validate promo discount on total price after all discounts
-      let totalPriceWithPromoDiscount = total - (total-50)*(Number(promoCodeValidationResponse.promoCode.discountPercentage)/100);
+      let totalPriceWithPromoDiscount = total - (total - shippingFees)*(Number(promoCodeValidationResponse.promoCode.discountPercentage)/100);
       //round it up to nearest 5
       totalPriceWithPromoDiscount = Math.ceil(totalPriceWithPromoDiscount/5)*5;
       if (totalPriceWithPromoDiscount !== totalPromoApplied) {
@@ -235,10 +238,8 @@ async function addToCartHandler(req, res, next) {
     order.otherInfo.orderSummaryMessage = orderSummaryMessage;
     // save the order
     const response = await bookedAbayaCollection.create(order, next);
-    //TODO:
-    //un-comment adminEmails.
-    // const adminEmails = [process.env.LAMAR_Eamil_1, process.env.LAMAR_Eamil_2];
-    const adminEmails = [];
+
+    const adminEmails = [process.env.LAMAR_Eamil_1, process.env.LAMAR_Eamil_2];
     const userEmail = personalInfo.email;
     const emailsArray = [...adminEmails, userEmail];
 
@@ -336,7 +337,6 @@ async function searcchProductsHandler(req, res, next) {
 
 //get admin settings handler
 async function getAdminSettingsHandler(req, res, next) {
-  //TODO: make a private route and authenticate it. remove some data from this opened route. like: promoCodes.
   try {
     // get settings
     const adminSettingsArr = await adminSettingsCollection.read();
