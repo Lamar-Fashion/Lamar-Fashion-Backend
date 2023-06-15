@@ -261,10 +261,14 @@ async function addToCartHandler(req, res, next) {
       client.messages
       .create({
         from: `whatsapp:${process.env.Twilio_Phone_Number_Sender_WHATSAPP}`,
-        body: "Lamar Fashion - Order Summary\n\n" + orderSummaryMessage,
+        body: orderSummaryMessage,
+        // body: "Lamar Fashion - Order Summary\n\n" + orderSummaryMessage,
         to: `whatsapp:${whatsappNumbers[i]}`
       })
-      .then(message => console.log('whatsapp message sent: ', message.sid))
+      .then(message => {
+        console.log(`whatsapp message sent to ${whatsappNumbers[i]} phone number: `, message.sid);
+        console.log('messageeeeeeeeeeeeeeeeeeeeeeeee: ', message)
+      })
       .catch(err => console.error("ERROR: Whatsapp API Send order summary error: ",err));
       
     };

@@ -31,29 +31,37 @@ function checkExpirationDate (stringDate, dateNow) {
 //generate order summary message
 function generateOrderSummaryMessage (order) {
     const personalInfo = order.personalInfo;
-    const productInfo = order.productInfo;
-    let summary = `Hi ${personalInfo.Fname ?? '' } ${personalInfo.Lname ?? ''},\n\nThank you for your recent purchase from Lamar Fashion. We are pleased to confirm your order. Here's a summary of your order:\n\nProduct(s) Ordered:\n\n`;
+    const productInfo = order.productInfo[0];
+    // let summary = `Hi ${personalInfo.Fname ?? '' } ${personalInfo.Lname ?? ''},\n\nThank you for your recent purchase from Lamar Fashion. We are pleased to confirm your order. Here's a summary of your order:\n\nProduct(s) Ordered:\n\n`;
 
-    // Loop over the products and concatenate the code and quantity to the string
-    for (let i = 0; i < productInfo.length; i++) {
-        summary += `- Product Code: ${productInfo[i].code}, Size: ${productInfo[i].size}, Quantity: ${productInfo[i].quantity}, Original Price: ${productInfo[i].price} QAR\n`;
-        summary += `Product Link: ${process.env.Website_URL}/ProductDetails/${productInfo[i].id}\n\n`;
-    }
+    // // Loop over the products and concatenate the code and quantity to the string
+    // for (let i = 0; i < productInfo.length; i++) {
+    //     summary += `- Product Code: ${productInfo[i].code}, Size: ${productInfo[i].size}, Quantity: ${productInfo[i].quantity}, Original Price: ${productInfo[i].price} QAR\n`;
+    //     summary += `Product Link: ${process.env.Website_URL}/ProductDetails/${productInfo[i].id}\n\n`;
+    // }
     
-    // Add the total price to the string
-    summary += `\nTotal Price: ${order.totalPrice} QAR`;
+    // // Add the total price to the string
+    // summary += `\nTotal Price: ${order.totalPrice} QAR`;
     
-    // Add the contact details to the string
-    summary += `\n\nWe'll use the phone number (${personalInfo.phone}) and email (${personalInfo.email}) you provided to get in touch.`;
+    // // Add the contact details to the string
+    // summary += `\n\nWe'll use the phone number (${personalInfo.phone}) and email (${personalInfo.email}) you provided to get in touch.`;
 
-    summary += `\n\nOrder will be shipped to:`;
-    summary += `\n${personalInfo.FlatNumber} [Building No.], ${personalInfo.StreetAddress} [Street], ${personalInfo.Zone}, ${personalInfo.city}, ${personalInfo.country}.`;
+    // summary += `\n\nOrder will be shipped to:`;
+    // summary += `\n${personalInfo.FlatNumber} [Building No.], ${personalInfo.StreetAddress} [Street], ${personalInfo.Zone}, ${personalInfo.city}, ${personalInfo.country}.`;
 
-    summary+= `\n\nIf you have any questions or concerns about your order, please don't hesitate to contact us. We're always here to help!\n\nThanks again for choosing our brand. We hope to see you again soon.\n\nBest regards,\n\nLamar Fashion Team.\n`;
+    // summary+= `\n\nIf you have any questions or concerns about your order, please don't hesitate to contact us. We're always here to help!\n\nThanks again for choosing our brand. We hope to see you again soon.\n\nBest regards,\n\nLamar Fashion Team.\n`;
 
-    // Add the contact details to the string
-    summary += `Phone: ${process.env.LAMAR_Phone_Number}\nEmail: ${process.env.NODE_MAILER_EMAIL_SENDER}`;
+    // // Add the contact details to the string
+    // summary += `Phone: ${process.env.LAMAR_Phone_Number}\nEmail: ${process.env.NODE_MAILER_EMAIL_SENDER}`;
 
+    // return summary;
+
+    let summary = `Hi ${personalInfo.Fname || ''+ personalInfo.Lname || ''}, Thank you for your recent purchase from Lamar Fashion. We are pleased to confirm your order. Here's a summary of your order:Product(s) Ordered:Product Code: ${productInfo.code}, Size: ${productInfo.size}, Quantity: ${productInfo.quantity}, Original Price: ${productInfo.price} QARTotal Price: ${order.totalPrice} QAR. We'll use the phone number ${personalInfo.phone} and email ${personalInfo.email} you provided to get in touch.Order will be shipped to: ${personalInfo.FlatNumber + " [Building No.], " + personalInfo.StreetAddress + " [Street], " + personalInfo.Zone + ", " + personalInfo.city + ", " + personalInfo.country} soon. If you have any questions or concerns about your order, please don't hesitate to contact us. We're always here to help!Thanks again for choosing our brand. We hope to see you again soon.Best regards,Lamar Fashion Team.Phone: +974 66881109 Email: info@lamarfashion.qa`;
+    
+    // let summary = `Hi ${personalInfo.Fname}, Thank you for your recent purchase from Lamar Fashion. We are pleased to confirm your order. Here's a summary of your order:Product(s) Ordered:Product Code: ${productInfo.code}, Size: ${productInfo.size}, Quantity: ${productInfo.quantity}, Original Price: ${productInfo.price} QARTotal Price: ${order.totalPrice} QAR. We'll use the phone number ${personalInfo.phone} and email ${personalInfo.email} you provided to get in touch.Order will be shipped to: ${personalInfo.city} soon. If you have any questions or concerns about your order, please don't hesitate to contact us. We're always here to help!Thanks again for choosing our brand. We hope to see you again soon.Best regards,Lamar Fashion Team.Phone: +974 66881109 Email: info@lamarfashion.qa`;
+
+    // let summary = `Hi {{1}}, Thank you for your recent purchase from Lamar Fashion. We are pleased to confirm your order. Here's a summary of your order:Product(s) Ordered:Product Code: {{2}}, Size: {{3}}, Quantity: {{4}}, Original Price: {{5}} QARTotal Price: {{6}} QAR. We'll use the phone number {{7}} and email {{8}} you provided to get in touch.Order will be shipped to: {{9}} soon. If you have any questions or concerns about your order, please don't hesitate to contact us. We're always here to help!Thanks again for choosing our brand. We hope to see you again soon.Best regards,Lamar Fashion Team.Phone: +974 66881109 Email: info@lamarfashion.qa`;
+    
     return summary;
 };
 //generate order summary message as HTML
