@@ -127,14 +127,16 @@ function generateOrderSummaryHTMLMessage (order) {
 //generate notification for wishlist becomes available message
 function generateWishlistAvailableMessage (product) {
    
-    let summary = `Great news!\n\nYour wishlist product "${product.code}" is now available. Check Abaya in our website ${process.env.Website_URL}/ProductDetails/${product.id} to purchase it before it's gone.\n\n`; 
+    // let summary = `Great news!\n\nYour wishlist product "${product.code}" is now available. Check Abaya in our website ${process.env.Website_URL}/ProductDetails/${product.id} to purchase it before it's gone.\n\n`; 
 
-    summary+= `\n\nThank you for choosing our store!\n`;
+    // summary+= `\n\nThank you for choosing our store!\n`;
     
-    summary+= `\n\nLamar Fashion Team.\n`;
+    // summary+= `\n\nLamar Fashion Team.\n`;
 
-    // Add the contact details to the string
-    summary += `Phone: ${process.env.LAMAR_Phone_Number}\nEmail: ${process.env.NODE_MAILER_EMAIL_SENDER}`;
+    // // Add the contact details to the string
+    // summary += `Phone: ${process.env.LAMAR_Phone_Number}\nEmail: ${process.env.NODE_MAILER_EMAIL_SENDER}`;
+
+    let summary = `Great news!\n\nYour wishlist product "${product.code}" is now available. Check Abaya in our website ${process.env.Website_URL}/ProductDetails/${product.id} to purchase it before it's gone.\n\nThank you for choosing our store!\n\nLamar Fashion Team.\nPhone: ${process.env.LAMAR_Phone_Number}\nEmail: ${process.env.NODE_MAILER_EMAIL_SENDER}`;
 
     return summary;
 };

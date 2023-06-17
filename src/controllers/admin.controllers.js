@@ -92,10 +92,13 @@ async function editProductHandler(req, res, next) {
               client.messages
               .create({
                 from: `whatsapp:${process.env.Twilio_Phone_Number_Sender_WHATSAPP}`,
-                body: "Lamar Fashion - Wishlist Product Available!\n\n" + wishlistAvailableMessage,
+                body: wishlistAvailableMessage,
                 to: `whatsapp:${usersPhoneNumbers[i]}`
               })
-              .then(message => console.log('whatsapp message sent: ', message.sid))
+              .then(message => {
+                console.log('whatsapp message: ', message);
+                console.log('whatsapp message sent: ', message.sid);
+              })
               .catch(err => console.error("ERROR: Whatsapp API Send notify product available error: ",err));
               
             };
