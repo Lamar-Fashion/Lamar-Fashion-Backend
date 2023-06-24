@@ -31,7 +31,7 @@ function checkExpirationDate (stringDate, dateNow) {
 //generate order summary message
 function generateOrderSummaryMessage (order) {
     const personalInfo = order.personalInfo;
-    const productInfo = order.productInfo[0];
+    const productInfo = order.productInfo;
     // let summary = `Hi ${personalInfo.Fname ?? '' } ${personalInfo.Lname ?? ''},\n\nThank you for your recent purchase from Lamar Fashion. We are pleased to confirm your order. Here's a summary of your order:\n\nProduct(s) Ordered:\n\n`;
 
     // // Loop over the products and concatenate the code and quantity to the string
@@ -56,14 +56,20 @@ function generateOrderSummaryMessage (order) {
 
     // return summary;
 
-    let summary = `Hi ${personalInfo.Fname || ''+ personalInfo.Lname || ''}, Thank you for your recent purchase from Lamar Fashion. We are pleased to confirm your order. Here's a summary of your order:Product(s) Ordered:Product Code: ${productInfo.code}, Size: ${productInfo.size}, Quantity: ${productInfo.quantity}, Original Price: ${productInfo.price} QARTotal Price: ${order.totalPrice} QAR. We'll use the phone number ${personalInfo.phone} and email ${personalInfo.email} you provided to get in touch.Order will be shipped to: ${personalInfo.FlatNumber + " [Building No.], " + personalInfo.StreetAddress + " [Street], " + personalInfo.Zone + ", " + personalInfo.city + ", " + personalInfo.country} soon. If you have any questions or concerns about your order, please don't hesitate to contact us. We're always here to help!Thanks again for choosing our brand. We hope to see you again soon.Best regards,Lamar Fashion Team.Phone: +974 66881109 Email: info@lamarfashion.qa`;
-    
-    // let summary = `Hi ${personalInfo.Fname}, Thank you for your recent purchase from Lamar Fashion. We are pleased to confirm your order. Here's a summary of your order:Product(s) Ordered:Product Code: ${productInfo.code}, Size: ${productInfo.size}, Quantity: ${productInfo.quantity}, Original Price: ${productInfo.price} QARTotal Price: ${order.totalPrice} QAR. We'll use the phone number ${personalInfo.phone} and email ${personalInfo.email} you provided to get in touch.Order will be shipped to: ${personalInfo.city} soon. If you have any questions or concerns about your order, please don't hesitate to contact us. We're always here to help!Thanks again for choosing our brand. We hope to see you again soon.Best regards,Lamar Fashion Team.Phone: +974 66881109 Email: info@lamarfashion.qa`;
+    let products = "";
+    for (let i = 0; i < productInfo.length; i++) {
+        products += `- Product Code: ${productInfo[i].code}, Size: ${productInfo[i].size}, Quantity: ${productInfo[i].quantity}, Original Price: ${productInfo[i].price} QAR\n`;
+        products += `Product Link: ${process.env.Website_URL}/ProductDetails/${productInfo[i].id}\n\n`;
+    };
 
-    // let summary = `Hi {{1}}, Thank you for your recent purchase from Lamar Fashion. We are pleased to confirm your order. Here's a summary of your order:Product(s) Ordered:Product Code: {{2}}, Size: {{3}}, Quantity: {{4}}, Original Price: {{5}} QARTotal Price: {{6}} QAR. We'll use the phone number {{7}} and email {{8}} you provided to get in touch.Order will be shipped to: {{9}} soon. If you have any questions or concerns about your order, please don't hesitate to contact us. We're always here to help!Thanks again for choosing our brand. We hope to see you again soon.Best regards,Lamar Fashion Team.Phone: +974 66881109 Email: info@lamarfashion.qa`;
+    let summary = `Hi ${personalInfo.Fname || '' + personalInfo.Lname || ''},\n\nThank you for your recent purchase from Lamar Fashion.\nWe are pleased to confirm your order.\n\nHere's a summary of your order:\n\nProduct(s) Ordered:\n\n${products}Total Price: ${order.totalPrice} QAR.\n\nWe'll use this phone number ${personalInfo.phone} and email ${personalInfo.email} you provided to get in touch.\nOrder will be shipped to: ${personalInfo.FlatNumber + " [Building No.], " + personalInfo.StreetAddress + " [Street], " + personalInfo.Zone + ", " + personalInfo.city + ", " + personalInfo.country + "."} soon.\n\nIf you have any questions or concerns about your order, please don't hesitate to contact us. We're always here to help!\n\nThanks again for choosing our brand.\nWe hope to see you again soon.\n\nBest regards,\nLamar Fashion Team.\nPhone: ${personalInfo.LAMAR_Phone_Number}\nEmail: ${process.env.NODE_MAILER_EMAIL_SENDER}\n\nNOTE*: This Whatsapp number used only for notifying you when your order successfully completed. so please don't reply to this chat, but reach out to our phone number instead: ${personalInfo.LAMAR_Phone_Number}.`;
     
+    //Whatsapp Template:
+    // Hi {{1}},\n\nThank you for your recent purchase from Lamar Fashion.\nWe are pleased to confirm your order.\n\nHere's a summary of your order:\n\nProduct(s) Ordered:\n\n{{2}}Total Price: {{3}} QAR.\n\nWe'll use this phone number {{4}} and email {{5}} you provided to get in touch.\nOrder will be shipped to: {{6}} soon.\n\nIf you have any questions or concerns about your order, please don't hesitate to contact us. We're always here to help!\n\nThanks again for choosing our brand.\nWe hope to see you again soon.\n\nBest regards,\nLamar Fashion Team.\nPhone: {{7}}\nEmail: {{8}}\n\nNOTE*: This Whatsapp number used only for notifying you when your order successfully completed. so please don't reply to this chat, but reach out to our phone number instead: {{7}}.
+
     return summary;
 };
+
 //generate order summary message as HTML
 function generateOrderSummaryHTMLMessage (order) {
     const personalInfo = order.personalInfo;
@@ -124,22 +130,19 @@ function generateOrderSummaryHTMLMessage (order) {
 
     return summary;
 };
+
 //generate notification for wishlist becomes available message
 function generateWishlistAvailableMessage (product) {
-   
-    // let summary = `Great news!\n\nYour wishlist product "${product.code}" is now available. Check Abaya in our website ${process.env.Website_URL}/ProductDetails/${product.id} to purchase it before it's gone.\n\n`; 
-
-    // summary+= `\n\nThank you for choosing our store!\n`;
-    
-    // summary+= `\n\nLamar Fashion Team.\n`;
-
-    // // Add the contact details to the string
-    // summary += `Phone: ${process.env.LAMAR_Phone_Number}\nEmail: ${process.env.NODE_MAILER_EMAIL_SENDER}`;
 
     let summary = `Great news!\n\nYour wishlist product "${product.code}" is now available. Check Abaya in our website ${process.env.Website_URL}/ProductDetails/${product.id} to purchase it before it's gone.\n\nThank you for choosing our store!\n\nLamar Fashion Team.\nPhone: ${process.env.LAMAR_Phone_Number}\nEmail: ${process.env.NODE_MAILER_EMAIL_SENDER}`;
 
+    //Whatsapp Template
+    // Great news!\n\nYour wishlist product "{{1}}" is now available. Check Abaya in our website {{2}}/ProductDetails/{{3}} to purchase it before it's gone.\n\nThank you for choosing our store!\n\nLamar Fashion Team.\nPhone: {{4}}\nEmail: {{5}}
+
+
     return summary;
 };
+
 //generate notification for wishlist becomes available message as HTML
 function generateWishlistAvailableHTMLMessage (product) {
     let summary = `<h2>Great news!</h2>`;
